@@ -1,0 +1,23 @@
+[project]
+name = "MCJ"
+version = "0.2.0"
+description = "Multi-Criterion (Semantic) Judgment (MCJ) task implemented in PsychoPy"
+readme = "README.md"
+requires-python = ">=3.10,<3.11"
+
+dependencies = [
+  "psychopy>=2026.1",
+  "pyyaml",
+  "numpy"
+]
+
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["MCJ*"]
+
+[project.scripts]
+sequence-mts = "MCJ.main:run"

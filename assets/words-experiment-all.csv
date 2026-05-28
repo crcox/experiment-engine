@@ -1,0 +1,49 @@
+word,domain,size,danger,orthography
+bear,living,big,dangerous,uppercase
+crocodile,living,big,dangerous,lowercase
+rhinocerous,living,big,dangerous,uppercase
+shark,living,big,dangerous,uppercase
+tiger,living,big,dangerous,lowercase
+wolf,living,big,dangerous,lowercase
+lamb,living,big,safe,uppercase
+sheep,living,big,safe,lowercase
+dolphin,living,big,safe,uppercase
+peacock,living,big,safe,lowercase
+llama,living,big,safe,lowercase
+pony,living,big,safe,uppercase
+infectious mosquito,living,small,dangerous,uppercase
+scorpion,living,small,dangerous,uppercase
+black widow,living,small,dangerous,lowercase
+hornet,living,small,dangerous,lowercase
+rattlesnake,living,small,dangerous,uppercase
+piranha,living,small,dangerous,lowercase
+butterfly,living,small,safe,lowercase
+ladybug,living,small,safe,lowercase
+bunny,living,small,safe,lowercase
+frog,living,small,safe,uppercase
+goldfish,living,small,safe,uppercase
+gecko,living,small,safe,uppercase
+wrecking ball,nonliving,big,dangerous,lowercase
+cannon,nonliving,big,dangerous,lowercase
+power line,nonliving,big,dangerous,uppercase
+torpedo,nonliving,big,dangerous,uppercase
+wood chipper,nonliving,big,dangerous,uppercase
+missle,nonliving,big,dangerous,lowercase
+mattress,nonliving,big,safe,lowercase
+guitar,nonliving,big,safe,uppercase
+couch,nonliving,big,safe,lowercase
+desk,nonliving,big,safe,lowercase
+piano,nonliving,big,safe,uppercase
+refrigerator,nonliving,big,safe,uppercase
+handgun,nonliving,small,dangerous,uppercase
+knife,nonliving,small,dangerous,lowercase
+dagger,nonliving,small,dangerous,uppercase
+razor,nonliving,small,dangerous,lowercase
+grenade,nonliving,small,dangerous,uppercase
+hammer,nonliving,small,dangerous,lowercase
+glove,nonliving,small,safe,lowercase
+whisk,nonliving,small,safe,uppercase
+brush,nonliving,small,safe,lowercase
+phone,nonliving,small,safe,uppercase
+sponge,nonliving,small,safe,uppercase
+spoon,nonliving,small,safe,lowercase
