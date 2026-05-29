@@ -1,27 +1,46 @@
 import json
 from pathlib import Path
-from mcj.plans.criterion_judgment.schema import CriterionJudgmentCondition
-from mcj.plans.criterion_judgment.schema import CriterionJudgmentPlan, CriterionJudgmentBlockPlan
-from mcj.plans.criterion_judgment.validation import validate_sequence_mts_plan
+from mcj.config.experiment import NUM_BLOCKS
+from mcj.stimuli.schema import WordTable
+from mcj.plans.criterion_judgment.schema import (
+    CriterionJudgmentPlan,
+    CriterionJudgmentBlockPlan,
+    CriterionJudgmentCondition,
+    CriterionJudgmentTrial
+)
 
 
-def _build_criterion_judgment_plan(data: dict):
+from mcj.plans.criterion_judgment.validation import validate_criterion_judgment_plan
+from typing import Sequence
+
+
+def _build_criterion_judgment_plan(data: dict, *, word_table: WordTable):
+    def _build_trials(word_sequence, word_table) -> Sequence[CriterionJudgmentTrial]:
+        return [
+            CriterionJudgmentTrial(
+                word=word_table[w].word,
+                domain=word_table[w].domain,
+                size=word_table[w].size,
+                danger=word_table[w].danger,
+                orthography=word_table[w].orthography
+            )
+            for w in word_sequence
+        ]
+
     blocks = [
         CriterionJudgmentBlockPlan(
             block_index=i,
-            instructions=data["instructions"],
-            trials=Sequence[WordTrial]
-        )
-        for i, block in enumerate(data['blocks'])
+            condition=CriterionJudgmentCondition(data["condition"]),
+            trials=_build_trials(block['word_sequence'], word_table) 
+        ) for i, block in enumerate(data['blocks'])
     ]
     return CriterionJudgmentPlan(
         subject_id=data['subject_id'],
-        condition=CriterionJudgmentCondition(data['condition']),
         blocks=blocks
     )
 
 
-def load_criterion_judgment_plan(path: Path) -> CriterionJudgmentPlan:
+def load_criterion_judgment_plan(path: Path, word_table: WordTable) -> CriterionJudgmentPlan:
     """
     Load and validate a CriterionJudgmentPlan from a JSON file.
 
@@ -40,8 +59,8 @@ def load_criterion_judgment_plan(path: Path) -> CriterionJudgmentPlan:
     with path.open("r", encoding="utf-8") as f:
         data = json.load(f)
 
-    validate_sequence_mts_plan(data)
-    return _build_sequence_mts_plan(data)
+    validate_criterion_judgment_plan(data, word_table=word_table)
+    return _build_criterion_judgment_plan(data, word_table=word_table)
 
 
 

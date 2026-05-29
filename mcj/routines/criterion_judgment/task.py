@@ -8,7 +8,7 @@ from mcj.plans.criterion_judgment.schema import CriterionJudgmentPlan
 from mcj.runtime.modes import TrialModeConfig
 from mcj.runtime.visuals import SequenceMTSVisuals
 from mcj.runtime.time import Timer
-from mcj.runtime.context import SessionContext
+from mcj.runtime.context import SessionContext, PlanRole
 from mcj.runtime.exceptions import EscapePressed
 from mcj.runtime.end_reasons import (
     TRIAL_ERROR, TRIAL_ABORTED, TRIAL_COMPLETE, TRIAL_TIMEOUT,
@@ -29,14 +29,13 @@ class TrialState(Enum):
 def run_block(win: Window, *,
         block_index: int,
         stimuli: StimulusPool,
-        visuals: SequenceMTSVisuals,
-        ring_positions: list[tuple[float, float]],
-        start_at: int,
+        visuals: CriterionJudgmentVisuals,
         ctx: SessionContext,
+        role: PlanRole,
         mode: TrialModeConfig,
         keyboard: Keyboard | None = None,
 ) -> int:
-    plan: CriterionJudgmentPlan = ctx.get_plan("criterion_judgment", role="practice")
+    plan: CriterionJudgmentPlan = ctx.get_plan("criterion_judgment", role=role)
     trial_plan = plan.trial_plan
     block_plan = plan.blocks[block_index]
     if mode.provide_feedback:

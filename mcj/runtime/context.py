@@ -5,6 +5,8 @@ from psychopy.core import Clock
 
 from mcj.plans.common import TaskPlan
 from mcj.runtime.events import EventRecorder
+from mcj.runtime.roles import PlanRole
+from mcj.config.experiment import SessionConfig
 from typing import Mapping
 
 
@@ -24,18 +26,20 @@ class SessionContext:
         *,
         plans: Mapping[str, Mapping[str, TaskPlan]],
         clock: Clock,
-        recorder: EventRecorder
+        recorder: EventRecorder,
+        config: SessionConfig
     ):
         self._plans = plans
-        self.clock: Clock = clock
-        self.recorder: EventRecorder = recorder
+        self.clock = clock
+        self.recorder = recorder
+        self.config = config
 
     def now(self) -> float:
         return self.clock.getTime()
 
-    def get_plan(self, task_code: str, *, role: str):
+    def get_plan(self, task_code: str, *, role: PlanRole):
         try:
-            return self._plans[task_code][role]
+            return self._plans[task_code][role.value]
         except KeyError:
             raise KeyError(
                 f"No plan registered for task={task_code!r}, role={role!r}"

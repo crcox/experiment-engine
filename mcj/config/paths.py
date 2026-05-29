@@ -1,24 +1,32 @@
 from pathlib import Path
+from mcj.runtime.modes import Mode
 import sys
 
 class _Paths:
     def __init__(self) -> None:
         self._root: Path | None = None
         self._subject_id: int | None = None
+        self._mode: Mode | None = None
 
-    def initialize(self, root: Path, subject_id: int) -> None:
+    def initialize(self, root: Path, subject_id: int, mode: Mode) -> None:
         self._root = root
         self._subject_id = subject_id
+        self._mode = mode
 
     def _require_root(self) -> Path:
         if self._root is None:
-            raise RuntimeError("paths.initialize(root, subject_id) must be called first")
+            raise RuntimeError("paths.initialize(root, subject_id, mode) must be called first")
         return self._root
 
     def _require_subject_id(self) -> int:
         if self._subject_id is None:
-            raise RuntimeError("paths.initialize(root, subject_id) must be called first")
+            raise RuntimeError("paths.initialize(root, subject_id, mode) must be called first")
         return self._subject_id
+
+    def _require_mode(self) -> Mode:
+        if self._mode is None:
+            raise RuntimeError("paths.initialize(root, subject_id, mode) must be called first")
+        return self._mode
 
 
     @property
@@ -43,7 +51,12 @@ class _Paths:
 
     @property
     def SESSION_PLAN(self) -> Path:
-        return self.ASSETS / "subjects" / f"{self._subject_code}.json"
+        subject_code = self._subject_code
+        mode = self._require_mode()
+        if mode == Mode.PRACTICE:
+            return self.ASSETS / "practice" / "practice.json"
+        else:
+            return self.ASSETS / "subjects" / f"{subject_code}.json"
 
     @property
     def PRACTICE_PLAN(self) -> Path:

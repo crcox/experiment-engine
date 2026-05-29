@@ -5,45 +5,53 @@ from psychopy.visual.rect import Rect
 from mcj.ui.dialogs import get_session_info
 from mcj.components.instructions import InstructionLayout
 from mcj.components.fixation import FixationCross
-from mcj.routines import mcj
 from mcj.runtime.context import SessionContext
 from mcj.runtime.events import EventRecorder
 from mcj.runtime.exceptions import ExperimentAbort
 from mcj.runtime.emitters import emit_session_start, emit_session_end
 from mcj.runtime.end_reasons import SESSION_ERROR, SESSION_COMPLETE
-from mcj.runtime.modes import TrialModeConfig, FeedbackConfig
+from mcj.runtime.modes import Mode, TrialModeConfig, FeedbackConfig
 from mcj.runtime.visuals import SequenceMTSVisuals
 from mcj.instructions.loader import load_instructions
-from mcj.stimuli.loader import load_stimulus_pool
+from mcj.stimuli.loader import load_word_metadata_csv, build_stimulus_pool
 from mcj.plans.loader import load_session_plan, load_practice_plan
 from mcj.helpers.quit import quit_psychopy
 from mcj.config.paths import paths
-from mcj.config.experiment import EXPERIMENT_NAME, NUM_BLOCKS
+from mcj.config.experiment import EXPERIMENT_NAME, CONFIG_BY_ROLE
 from mcj.io.loggers import (
     MouseClickLogger,
     MousePositionLogger,
     SessionLogger
 )
+from mcj import routines
 from pathlib import Path
 import json
 
 
 def run():
 
-    ctx = SessionContext(
-        plan = load_session_plan(paths.SESSION_PLAN),
-        practice_plan = load_practice_plan(paths.PRACTICE_PLAN),
-        clock = core.Clock(),
-        recorder = EventRecorder()
-    )
-
     try:
         # --- Collect and then set session_info ---
         win = visual.Window(size=(800, 600), color='grey', units='height', fullscr=False)
         session_info = get_session_info(EXPERIMENT_NAME)
+
+        paths.initialize(
+            root=Path.cwd(),
+            subject_id=session_info.subject_id,
+            mode=session_info.mode
+        )
+
+        ctx = SessionContext(
+            plans={ 
+                'scanner': load_session_plan(paths.SESSION_PLAN)
+            },
+            clock=core.Clock(),
+            recorder=EventRecorder(),
+            context=CONFIG_BY_ROLE[session_info.role]
+        )
+
         emit_session_start(ctx)
 
-        paths.initialize(root=Path.cwd(), subject_id=session_info.subject_id)
 
         # --- Write session.json ---
         with open(paths.DATA / "session.json", 'w', encoding='utf-8') as f: 
@@ -124,7 +132,8 @@ def run():
             paths.INSTRUCTIONS / "end.yaml"
         )
 
-        stimuli = load_stimulus_pool(win)
+        word_table = load_word_metadata_csv()
+        stimuli = build_stimulus_pool(win, word_table)
 
 
         # --- Run routines ---

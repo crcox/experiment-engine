@@ -11,7 +11,9 @@ BLOCK_ABORTED: BlockEndReason = "aborted"
 BLOCK_ERROR: BlockEndReason = "error"
 BLOCK_COMPLETE: BlockEndReason = "complete"
 
-SessionEndReason: TypeAlias = Literal["aborted", "error", "complete"]
+SessionEndReason: TypeAlias = Literal["aborted", "error", "complete", "invalid input"]
 SESSION_ABORTED: SessionEndReason = "aborted"
 SESSION_ERROR: SessionEndReason = "error"
 SESSION_COMPLETE: SessionEndReason = "complete"
+
+INVALID_INPUT: SessionEndReason = "invalid input"

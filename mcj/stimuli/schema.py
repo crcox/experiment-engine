@@ -1,8 +1,9 @@
-from psychopy.visual.window import Window
+from __future__ import annotations
+
 from psychopy.visual.text import TextStim
-from dataclasses import dataclass, replace
+from dataclasses import dataclass
 from mcj.runtime.exceptions import DataContractError
-from typing import TypeAlias
+from typing import TypeAlias, Mapping
 
 WORDS = ["bear", "crocodile", "rhinocerous", "shark", "tiger", "wolf", "lamb",
          "sheep", "dolphin", "peacock", "llama", "pony", "infectious mosquito",
@@ -14,7 +15,7 @@ WORDS = ["bear", "crocodile", "rhinocerous", "shark", "tiger", "wolf", "lamb",
          "hammer", "glove", "whisk", "brush", "phone", "sponge", "spoon"]
 
 @dataclass(frozen=True)
-class Word:
+class WordMetadata:
     word: str
     domain: str
     size: str
@@ -51,18 +52,7 @@ class Word:
     def is_uppercase(self) -> bool:
         return self.orthography == "uppercase"
 
-    def build_stimulus(self, win: Window) -> TextStim:
-        return TextStim(
-            win,
-            text=self.word,
-            name=f"word_{self.word}",
-            color=[1.0, 1.0, 1.0],
-            colorSpace="rgb"
-        )
 
-    def add_stimulus(self, win: Window) -> Word:
-        return replace(self, stimulus=self.build_stimulus(win))
-
-
-StimulusPool: TypeAlias = dict[Word, TextStim]
+WordTable: TypeAlias = Mapping[str, WordMetadata]
+StimulusPool: TypeAlias = Mapping[str, TextStim]
 

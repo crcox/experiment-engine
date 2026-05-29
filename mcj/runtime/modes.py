@@ -1,7 +1,12 @@
 from dataclasses import dataclass
 from typing import Literal
+from enum import Enum
 
-ConfigName = Literal["practice", "experimental"]
+class Mode(str, Enum):
+    PRACTICE = "practice"
+    SCANNER = "scanner"
+
+ConfigName = Literal["practice", "scanner"]
 TaskCode = Literal["mcj_domain", "mcj_size", "mcj_mcj_danger", "mcj_orthography"]
 
 @dataclass(frozen=True)

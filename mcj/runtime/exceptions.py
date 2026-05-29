@@ -1,4 +1,4 @@
-from mcj.runtime.end_reasons import SESSION_ABORTED, SessionEndReason
+from mcj.runtime.end_reasons import SESSION_ABORTED, INVALID_INPUT, SessionEndReason
 
 class ExperimentAbort(Exception):
     """Raised to abort the experiment for a known semantic reason."""
@@ -19,14 +19,21 @@ class CancelPressed(ExperimentAbort):
         self.cause = "cancel_dialog"
         super().__init__()
 
-class DataContractError(Exception):
+class DataContractError(ExperimentAbort):
     """Raised to abort the experiment when an asset is invalid"""
     def __init__(self):
-        self.reason = SESSION_ABORTED
+        self.reason = INVALID_INPUT
         self.cause = "invalid_file"
         super().__init__()
 
-
-class CriterionJudgmentPlanError(ValueError):
+class CriterionJudgmentPlanError(Exception):
     """Raised when a trial plan file is malformed or invalid."""
+
+class SessionInfoError(ExperimentAbort):
+    """Raised to abort the experiment when session info is invalid"""
+    def __init__(self):
+        self.reason = INVALID_INPUT
+        self.cause = "invalid_session_info"
+        super().__init__()
+
 

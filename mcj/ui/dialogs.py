@@ -1,17 +1,17 @@
 from __future__ import annotations
 
-from psychopy import gui, core
-from mcj.config.experiment import ExperimentCondition
-from mcj.runtime.exceptions import SessionAbort
-from mcj.runtime.end_reasons import SESSION_ABORTED
+from psychopy import gui
+from mcj.runtime.modes import Mode
+from mcj.runtime.roles import PlanRole
+from mcj.runtime.exceptions import CancelPressed, SessionInfoError
 from dataclasses import dataclass
 
 
 @dataclass(frozen=True)
 class SessionInfo:
     subject_id: int
-    condition: ExperimentCondition
-    session: int
+    mode: Mode
+    role: PlanRole
 
 
 def get_session_info(exp_name: str) -> SessionInfo:
@@ -32,8 +32,7 @@ def get_session_info(exp_name: str) -> SessionInfo:
     # dialog box
     ui_info: dict[str, str | list[str]] = {
         "subject_id": "",
-        "condition": [c.value for c in ExperimentCondition],
-        "session": "1"
+        "mode": [m.value for m in Mode]
     }
 
     dlg = gui.DlgFromDict(
@@ -43,7 +42,7 @@ def get_session_info(exp_name: str) -> SessionInfo:
     )
 
     if not dlg.OK:
-        raise SessionAbort(reason=SESSION_ABORTED, cause="cancel_button")
+        raise CancelPressed
 
 
     session_info: dict[str, str] = {
@@ -61,19 +60,22 @@ def _parse_session_info(session_info: dict[str, str]) -> SessionInfo:
     except (KeyError, ValueError):
         raise RuntimeError("subject_id must be an integer")
 
-    try:
-        session = int(session_info.get("session", "1"))
-    except ValueError:
-        raise RuntimeError("session must be an integer")
-
-    condition = ExperimentCondition(
-        session_info.get("condition", "").strip()
-    )
-    if not condition:
+    mode_str = session_info.get("condition", "").strip()
+    if not mode_str:
         raise RuntimeError("condition is required")
+
+    try:
+        mode = Mode(mode_str)
+    except ValueError as e:
+        raise SessionInfoError from e
+
+    if mode == Mode.PRACTICE:
+        role = PlanRole.PRACTICE
+    elif mode == Mode.SCANNER:
+        role = PlanRole.MAIN
 
     return SessionInfo(
         subject_id=subject_id,
-        condition=condition,
-        session=session,
+        mode=mode,
+        role=role
     )
