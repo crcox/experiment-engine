@@ -1,5 +1,6 @@
 {
-    "subject_id": 1
+    "subject_id": 999,
+    "left_response": "yes",
     "blocks": [
         {
             "condition": "size",
@@ -56,5 +57,3 @@
         }
     ]
 }
-
-

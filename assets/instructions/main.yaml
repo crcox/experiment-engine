@@ -1,0 +1,11 @@
+slides:
+  - id: task 
+    title: "Instructions"
+    body: >
+      You will be presented with words one at a time. Each word refers to a
+      living or non-living thing.
+
+      Before each block of words, we will provide a statement like "can fly".
+
+      Judge whether the statement is true by pressing XXX for "yes" and YYY for
+      "no".

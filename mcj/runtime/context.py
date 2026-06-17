@@ -1,16 +1,18 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from psychopy.core import Clock
 
+from mcj.runtime.time import Clock
 from mcj.plans.common import TaskPlan
+from mcj.runtime.modes import Mode
+from mcj.runtime.roles import RoleConfig
 from mcj.runtime.events import EventRecorder
-from mcj.runtime.roles import PlanRole
-from mcj.config.experiment import SessionConfig
-from typing import Mapping
+from mcj.runtime.input import InputManager, InputBackend
+from typing import Mapping, Type, TypeVar
 
+T = TypeVar("T", bound=TaskPlan)
 
-@dataclass
+@dataclass(frozen=True)
 class SessionContext:
     """
     Runtime context for a single experimental session.
@@ -21,26 +23,32 @@ class SessionContext:
     - immutable TaskPlans
     """
     
-    def __init__(
-        self,
-        *,
-        plans: Mapping[str, Mapping[str, TaskPlan]],
-        clock: Clock,
-        recorder: EventRecorder,
-        config: SessionConfig
-    ):
-        self._plans = plans
-        self.clock = clock
-        self.recorder = recorder
-        self.config = config
+    _plans: Mapping[str, TaskPlan]
+    clock: Clock
+    input: InputManager
+    input_backend: InputBackend
+    recorder: EventRecorder
 
     def now(self) -> float:
-        return self.clock.getTime()
+        return self.clock()
 
-    def get_plan(self, task_code: str, *, role: PlanRole):
+    def get_plan(self, task_code: str) -> TaskPlan:
         try:
-            return self._plans[task_code][role.value]
+            return self._plans[task_code]
         except KeyError:
             raise KeyError(
-                f"No plan registered for task={task_code!r}, role={role!r}"
+                f"No plan registered for task={task_code!r}"
             )
+
+    def get_plan_typed(self, task_code: str, cls: Type[T]) -> T:
+        plan = self.get_plan(task_code)
+        assert isinstance(plan, cls)
+        return plan
+
+
+@dataclass(frozen=True)
+class RuntimeContext:
+    ctx: SessionContext
+    role_cfg: RoleConfig
+    mode: Mode
+

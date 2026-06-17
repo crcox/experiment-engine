@@ -1,0 +1,24 @@
+slides:
+  - id: task 
+    title: "Instructions"
+    body: >
+      You will be presented with words one at a time. Each word refers to a
+      living or non-living thing.
+
+      Before each block of words, we will provide a statement like "can fly".
+
+      Judge whether the statement is true by pressing XXX for "yes" and YYY for
+      "no".
+
+  - id: practice
+    title: "Time to practice"
+    body: >
+        This is a chance to practice each of the 4 judgements that you will
+        make while in the MRI.
+
+        Some judgements need a reference point. We will introduce these now
+        while you practice. Judge the same way in the MRI.
+
+        Once a word appears on screen, you will have 2 seconds to respond. For
+        now, feedback will be provided after your responses. You will not
+        receive feedback in the MRI.

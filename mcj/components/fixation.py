@@ -1,21 +1,19 @@
-from psychopy.visual.window import Window
-from mcj.components.typed_stim import TypedShapeStim
+from mcj.runtime.display_primitives import StimFactory
 
-class FixationCross(TypedShapeStim):
-    def __init__(self, win: Window, **kwargs):
-        super().__init__(
-            win=win,
+class FixationDisplay:
+    def __init__(self, factory: StimFactory):
+        self.fixation_cross = factory.create_known_shape(
             name='fixation_cross',
-            vertices='cross',
-            size=(0.1, 0.1),
+            shape='cross',
+            size=(0.03, 0.03),
             pos=(0, 0),
-            draggable=False,
-            anchor='center',
-            lineWidth=0.05,
-            colorSpace='rgb',
-            lineColor='white',
-            fillColor='black',
-            interpolate=True,
-            **kwargs
+            color='white'
         )
-    
+
+    def update(
+        self,
+    ):
+        pass
+
+    def draw(self):
+        self.fixation_cross.draw()

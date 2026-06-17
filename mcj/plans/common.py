@@ -1,4 +1,13 @@
-from typing import Protocol
+from abc import ABC
 
-class TaskPlan(Protocol):
-    """Marker protocol for all task plans."""
+class BlockPlan(ABC):
+    """
+    Base class for all block plans.
+    """
+    pass
+
+class TaskPlan(ABC):
+    """
+    Base class for all task plans.
+    """
+    subject_id: int

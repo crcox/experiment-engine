@@ -1,10 +1,12 @@
-from typing import TypedDict
+from dataclasses import dataclass
 
-
-class InstructionSlide(TypedDict):
+@dataclass(frozen=True)
+class InstructionSlide:
+    id: str
     title: str
     body: str
 
 
-class InstructionDocument(TypedDict):
+@dataclass(frozen=True)
+class InstructionDocument:
     slides: list[InstructionSlide]

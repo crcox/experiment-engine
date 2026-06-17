@@ -1,5 +1,11 @@
 .nvim.lua
 .venv/
+trash/
+data/
+for_copilot.py
+import.log
+**/__pycache__/
 pyrightconfig.json
 pyrightconfig_laptop.json
 pyrightconfig_office.json
+

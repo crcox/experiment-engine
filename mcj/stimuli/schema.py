@@ -1,18 +1,8 @@
 from __future__ import annotations
 
-from psychopy.visual.text import TextStim
 from dataclasses import dataclass
 from mcj.runtime.exceptions import DataContractError
 from typing import TypeAlias, Mapping
-
-WORDS = ["bear", "crocodile", "rhinocerous", "shark", "tiger", "wolf", "lamb",
-         "sheep", "dolphin", "peacock", "llama", "pony", "infectious mosquito",
-         "scorpion", "black widow", "hornet", "rattlesnake", "piranha",
-         "butterfly", "ladybug", "bunny", "frog", "goldfish", "gecko",
-         "wrecking ball", "cannon", "power line", "torpedo", "wood chipper",
-         "missle", "mattress", "guitar", "couch", "desk", "piano",
-         "refrigerator", "handgun", "knife", "dagger", "razor", "grenade",
-         "hammer", "glove", "whisk", "brush", "phone", "sponge", "spoon"]
 
 @dataclass(frozen=True)
 class WordMetadata:
@@ -21,38 +11,19 @@ class WordMetadata:
     size: str
     danger: str
     orthography: str
-    stimulus: TextStim | None
 
     def __post_init__(self):
         if not self.domain in ["living", "nonliving"]:
-            raise DataContractError()
+            raise DataContractError(f"Invalid domain code: {self.domain!r} for word {self.word!r}.")
 
         if not self.size in ["big", "small"]:
-            raise DataContractError()
+            raise DataContractError(f"Invalid size code: {self.size!r} for word {self.word!r}.")
 
         if not self.danger in ["safe", "dangerous"]:
-            raise DataContractError()
+            raise DataContractError(f"Invalid danger code: {self.danger!r} for word {self.word!r}.")
 
         if not self.orthography in ["uppercase", "lowercase"]:
-            raise DataContractError()
-
-    @property
-    def is_living(self) -> bool:
-        return self.domain == "living"
-
-    @property
-    def is_big(self) -> bool:
-        return self.size == "big"
-
-    @property
-    def is_safe(self) -> bool:
-        return self.danger == "safe"
-
-    @property
-    def is_uppercase(self) -> bool:
-        return self.orthography == "uppercase"
-
+            raise DataContractError(f"Invalid orthography code: {self.orthography!r} for word {self.word!r}.")
 
 WordTable: TypeAlias = Mapping[str, WordMetadata]
-StimulusPool: TypeAlias = Mapping[str, TextStim]
 

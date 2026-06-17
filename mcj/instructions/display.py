@@ -1,12 +1,11 @@
 from __future__ import annotations
 
-from psychopy.visual.window import Window
-from psychopy.visual.text import TextStim
+from mcj.runtime.display_primitives import StimFactory
 from mcj.instructions.schema import InstructionSlide
 
-class InstructionLayout:
-    def __init__(self, win: Window):
-        self.win = win
+class InstructionDisplay:
+    def __init__(self, factory: StimFactory):
+        self.factory = factory
 
         title_text_height = 0.06
         body_text_height = 0.045
@@ -15,25 +14,27 @@ class InstructionLayout:
         vspace = 0.05
         body_box_top = title_box_bottom - vspace
 
-        self.title_stim: TextStim = TextStim(
-            win,
+        self.title_stim = factory.create_text(
+            name="instruction_title",
             pos=(0, title_box_top),
-            anchorVert="top",
             height=title_text_height,
-            bold=True
+            color="white",
+            anchor_vert="top",
+            bold=True,
         )
-        self.body_stim: TextStim = TextStim(
-            self.win,
+        self.body_stim = factory.create_text(
+            name="instruction_body",
             pos=(0, body_box_top),
-            anchorVert="top",
             height=body_text_height,
-            wrapWidth=1.4
+            color="white",
+            anchor_vert="top",
+            wrap_width=0.7,
         )
 
 
     def update(self, slide: InstructionSlide):
-        self.title_stim.text = slide.get("title", "")
-        self.body_stim.text = slide.get("body", "")
+        self.title_stim.set_text(slide.title)
+        self.body_stim.set_text(slide.body)
 
 
     def draw(self):

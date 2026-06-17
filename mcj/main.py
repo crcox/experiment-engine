@@ -1,193 +1,133 @@
-from platform import python_version
-from psychopy import visual, core, __version__ as psychopy_version
-from psychopy.hardware import keyboard
-from psychopy.visual.rect import Rect
-from mcj.ui.dialogs import get_session_info
-from mcj.components.instructions import InstructionLayout
-from mcj.components.fixation import FixationCross
-from mcj.runtime.context import SessionContext
-from mcj.runtime.events import EventRecorder
-from mcj.runtime.exceptions import ExperimentAbort
-from mcj.runtime.emitters import emit_session_start, emit_session_end
-from mcj.runtime.end_reasons import SESSION_ERROR, SESSION_COMPLETE
-from mcj.runtime.modes import Mode, TrialModeConfig, FeedbackConfig
-from mcj.runtime.visuals import SequenceMTSVisuals
-from mcj.instructions.loader import load_instructions
-from mcj.stimuli.loader import load_word_metadata_csv, build_stimulus_pool
-from mcj.plans.loader import load_session_plan, load_practice_plan
-from mcj.helpers.quit import quit_psychopy
-from mcj.config.paths import paths
-from mcj.config.experiment import EXPERIMENT_NAME, CONFIG_BY_ROLE
-from mcj.io.loggers import (
-    MouseClickLogger,
-    MousePositionLogger,
-    SessionLogger
-)
-from mcj import routines
+# --- Standard library ---
 from pathlib import Path
+from platform import python_version
 import json
 
 
+# --- Config ---
+from mcj.config.paths import paths
+from mcj.config.experiment import EXPERIMENT_NAME
+
+
+# --- Runtime core ---
+from mcj.runtime.backend import RenderBackend
+from mcj.runtime.context import RuntimeContext
+from mcj.runtime.exceptions import ExperimentAbort
+from mcj.runtime.emitters import (
+    emit_session_start,
+    emit_session_end,
+    emit_mode_set,
+    emit_role_set,
+)
+from mcj.runtime.end_reasons import EndReason
+from mcj.runtime.roles import PlanRole
+from mcj.runtime.setup import build_session, resolve_display
+
+# --- Task Runtime and Configuration ---
+from mcj.tasks.criterion_judgment.display import (
+    CriterionJudgmentPromptDisplay,
+    CriterionJudgmentDefinitionDisplay,
+)
+from mcj.tasks.criterion_judgment.config import  CriterionJudgmentTaskConfig
+
+# --- UI / components ---
+from mcj.ui.dialogs import PsychoPyDialogProvider
+from mcj.dev.session_info import StaticSessionInfoProvider
+
+# --- Routines ---
+from mcj.tasks.criterion_judgment import task as cj_task
+
+CriterionJudgmentDisplay = CriterionJudgmentPromptDisplay | CriterionJudgmentDefinitionDisplay
+
+DEV_MODE = True
+RENDER_BACKEND = RenderBackend.FAKE
+
+if DEV_MODE or RENDER_BACKEND == RenderBackend.FAKE:
+    from mcj.dev.scripts import test_practice_script
+
+    provider = StaticSessionInfoProvider({
+        "subject_id": 999,
+        "mode": "practice",
+        "role": "dev",
+        "input_backend": "scripted",
+        "script": test_practice_script()
+    })
+else:
+    provider = PsychoPyDialogProvider()
+
+
 def run():
+    # --- Collect and then set session_info ---
+    session_info = provider.get_session_info(EXPERIMENT_NAME)
 
+    paths.initialize(
+        root=Path.cwd(),
+        subject_id=session_info.subject_id,
+    )
+
+    ctx, role_cfg, session_logger = build_session(session_info, backend=RENDER_BACKEND)
+
+    print(ctx.input_backend)
+    for term in role_cfg.termination_by_state.items():
+        print(term)
+
+    factory, display = resolve_display(session_info, backend=RENDER_BACKEND, dev_mode=DEV_MODE)
+
+    # --- Write session.json ---
+    paths.DATA.mkdir(parents=True, exist_ok=True)
+    with open(paths.DATA / "session.json", 'w', encoding='utf-8') as f: 
+        json.dump({
+            "type": "session_start",
+            "time": ctx.now(),
+            "subject_id": session_info.subject_id,
+            "role": session_info.role.value,
+            "mode": session_info.mode.value,
+            "input_backend": session_info.input_backend.value,
+            "display": display.to_dict(),
+            "psychopy_version": factory.version(),
+            "python_version": python_version()
+        }, f)
+
+    # --- Start Session ---
+    emit_session_start(ctx)
+    emit_mode_set(ctx, session_info.mode)
+    emit_role_set(ctx, session_info.role)
+
+    end_reason = EndReason.COMPLETE
+    end_cause = None
+
+    # =======================================
+    # --- BEGIN PRESENTING TO PARTICIPANT ---
+    # =======================================
     try:
-        # --- Collect and then set session_info ---
-        win = visual.Window(size=(800, 600), color='grey', units='height', fullscr=False)
-        session_info = get_session_info(EXPERIMENT_NAME)
+        # --- Bundle runtime context and configuration ---
+        run_ctx=RuntimeContext(ctx=ctx, role_cfg=role_cfg, mode=session_info.mode)
 
-        paths.initialize(
-            root=Path.cwd(),
-            subject_id=session_info.subject_id,
-            mode=session_info.mode
+        run_cfg = CriterionJudgmentTaskConfig(
+            instructions_path = {
+                PlanRole.PRACTICE: paths.INSTRUCTIONS / "practice.yaml",
+                PlanRole.MAIN: paths.INSTRUCTIONS / "main.yaml",
+                PlanRole.DEV: paths.INSTRUCTIONS / "practice.yaml",
+            }[session_info.role]
         )
 
-        ctx = SessionContext(
-            plans={ 
-                'scanner': load_session_plan(paths.SESSION_PLAN)
-            },
-            clock=core.Clock(),
-            recorder=EventRecorder(),
-            context=CONFIG_BY_ROLE[session_info.role]
-        )
-
-        emit_session_start(ctx)
-
-
-        # --- Write session.json ---
-        with open(paths.DATA / "session.json", 'w', encoding='utf-8') as f: 
-            json.dump({
-                "type": "session_start",
-                "time": ctx.clock.getTime(),
-                "subject_id": session_info.subject_id,
-                "condition": session_info.condition,
-                "psychopy_version": psychopy_version,
-                "python_version": python_version()
-            }, f)
-
-
-        # --- Configure trial modes ---
-        PRACTICE = TrialModeConfig(
-            name = "practice",
-            task_code = "mcj",
-            trial_duration_seconds = 3.0,
-            block_duration_seconds = None,
-            feedback = FeedbackConfig(
-                duration_seconds = 0.5,
-                color_positive = "green",
-                color_negative = "red",
-                color_neutral = None
-            )
-        )
-
-        EXPERIMENTAL = TrialModeConfig(
-            name = "experimental",
-            task_code = "mcj",
-            trial_duration_seconds = 3.0,
-            block_duration_seconds = 210.0,
-            feedback = None
-        )
-
-
-        # --- Configure routine/task layouts ---
-        SEQ_MTS_LAYOUT_CONFIG = mcj.layout.RingLayoutConfig()
-
-
-        # --- Define I/O devices ---
-        kb = keyboard.Keyboard()
-
-        # --- Instantiate loggers ---
-        session_logger = SessionLogger(paths.DATA / "session.events.jsonl")
-
-        mcj_click_logger = MouseClickLogger(
-            path = paths.DATA / "task-mcj.events.jsonl",
-            task_code = "mcj"
-        )
-
-        mcj_position_logger = MousePositionLogger(
-            path = paths.DATA / "task-mcj.positions.jsonl",
-            task_code = "mcj"
-        )
-
-
-        # --- Instantiate shared components and layouts ---
-        instruction_layout = InstructionLayout(win)
-        fixation = FixationCross(win)
-
-
-        visuals = SequenceMTSVisuals(
-            highlight = Rect(win=win, size=(0.15, 0.15), lineWidth=2)
-        )
-
-
-        # --- Load assets ---
-        practice_instructions = load_instructions(
-            paths.INSTRUCTIONS / "practice.yaml"
-        )
-
-        task_instructions = load_instructions(
-            paths.INSTRUCTIONS / "task.yaml"
-        )
-
-        end_instructions = load_instructions(
-            paths.INSTRUCTIONS / "end.yaml"
-        )
-
-        word_table = load_word_metadata_csv()
-        stimuli = build_stimulus_pool(win, word_table)
-
-
-        # --- Run routines ---
-
-        ## Practice Instructions
-        routines.practice_instructions.run(
-            win,
-            layout=instruction_layout,
-            slides=practice_instructions["slides"],
-            keyboard=kb
-        )
-
-        ## mcj (practice mode)
-        _ = routines.mcj_task.run_block(
-            win,
-            start_at=0,
-            stimuli=stimuli,
-            visuals=visuals,
-            block_index=0,
-            keyboard=kb,
-            ctx=ctx,
-            mode=PRACTICE
-        )
-
-
-        ## mcj (experimental mode)
-        cursor = 0
-        for block_index in range(NUM_BLOCKS):
-            cursor = routines.mcj_task.run_block(
-                win,
-                start_at=cursor,
-                stimuli=stimuli,
-                visuals=visuals,
-                block_index=block_index,
-                ring_positions=ring_positions,
-                mouse_tracker=mouse_tracker,
-                keyboard=kb,
-                ctx=ctx,
-                mode=EXPERIMENTAL
-            )
-
-        # --- Indicate that the session completed successfully ---
-        emit_session_end(ctx, reason=SESSION_COMPLETE, cause=None)
+        cj_task.run(factory, run_ctx=run_ctx, run_cfg=run_cfg)
 
     except ExperimentAbort as e:
-        emit_session_end(ctx, reason=e.reason, cause=e.cause)
+        end_reason = e.reason
+        end_cause = e.cause
+        raise
 
     except Exception as e:
-        emit_session_end(ctx, reason=SESSION_ERROR, cause=type(e).__name__)
+        end_reason = EndReason.ERROR
+        end_cause = type(e).__name__
         raise
 
     finally:
+        emit_session_end(ctx, reason=end_reason, cause=end_cause)
         session_logger.write_new(ctx.recorder)
-        mcj_click_logger.write_new(ctx.recorder)
-        mcj_position_logger.write_new(ctx.recorder)
-        quit_psychopy(win)
+        factory.close()
 
+
+if __name__ == "__main__":
+    run()

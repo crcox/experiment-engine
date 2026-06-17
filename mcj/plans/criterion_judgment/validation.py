@@ -14,14 +14,13 @@ def _validate_subject_id(data: dict[str, Any]) -> None:
         )
 
 
-def _validate_condition(data: dict[str, Any]) -> None:
-    condition = data["condition"]
-    if not isinstance(condition, str):
+def _validate_condition(raw:  Any) -> None:
+    if not isinstance(raw, str):
         raise CriterionJudgmentPlanError(
-            f"`condition` must be a string; got {type(condition).__name__!r}"
+            f"`condition` must be a string; got {type(raw).__name__!r}"
         )
 
-    CriterionJudgmentCondition(condition)
+    CriterionJudgmentCondition(raw)
 
 
 def _validate_word_sequence(
@@ -30,7 +29,7 @@ def _validate_word_sequence(
     word_table: WordTable,
     context: str
 ) -> None:
-    valid_words = set(WORDS)
+    valid_words = set(word_table.keys())
     seq_words = set(word_sequence)
 
     invalid_words = seq_words - valid_words
@@ -43,6 +42,7 @@ def _validate_word_sequence(
 def _validate_session_plan(data: dict[str, Any]) -> None:
     required_keys = {
         "subject_id",
+        "left_response",
         "blocks"
     }
 
@@ -64,8 +64,7 @@ def _validate_block_plan(data: dict[str, Any], *, word_table: WordTable) -> None
         if "condition" not in block:
             raise CriterionJudgmentPlanError("Each `block` dict must have key 'condition'")
 
-        if not isinstance(block["condition"], str):
-            raise CriterionJudgmentPlanError("`block['condition']` must be str")
+        _validate_condition(block["condition"])
 
         if "word_sequence" not in block:
             raise CriterionJudgmentPlanError("Each `block` dict must have key 'word_sequence'")
@@ -90,7 +89,6 @@ def validate_criterion_judgment_plan(data: dict[str, Any], word_table: WordTable
         CriterionJudgmentPlanError on first failure.
     """
     _validate_subject_id(data)
-    _validate_condition(data)
     _validate_session_plan(data)
     _validate_block_plan(data, word_table=word_table)
 

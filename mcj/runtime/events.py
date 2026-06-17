@@ -1,57 +1,41 @@
 from __future__ import annotations
 
-from typing import TypedDict, Literal
+EventDict = dict[str, object]
 
-Event = dict[str, object]
+SESSION_EVENTS = {
+    "session_start",
+    "session_end",
+    "block_start",
+    "block_end",
+    "trial_start",
+    "trial_end",
+    "stimulus_start",
+    "stimulus_end",
+    "feedback_start",
+    "feedback_end",
+    "instruction_start",
+    "instruction_end",
+    "slide_start",
+    "slide_end",
+    "alignment_start",
+    "alignment_end",
+    "task_start",
+    "task_end",
+    "fixation_start",
+    "fixation_end",
+    "prompt_start",
+    "prompt_end",
+    "definition_start",
+    "definition_end",
+    "condition_set",
+    "mode_set",
+    "role_set",
+    "stimulus_onset",
+    "response",
+    "button_event",
+    "scanner_trigger",
+}
 
-class BaseEvent(TypedDict):
-    type: str
-    time: float
-
-class MouseClickEvent(BaseEvent):
-    block_index: int
-    node_index: int
-    button: Literal["left", "middle", "right"]
-    x: float
-    y: float
-    target: str
-    target_pos: tuple[float, float]
-    target_size: tuple[float, float]
-    target_contains_click: bool
-
-class MousePositionEvent(BaseEvent):
-    block_index: int
-    node_index: int
-    button: Literal["left", "middle", "right"]
-    sample_reason: Literal["periodic", "button_change"]
-    x: float
-    y: float
-
-SessionStartEvent = BaseEvent
-    
-class BlockStartEvent(BaseEvent):
-    block_index: int
-
-class BlockAbortEvent(BaseEvent):
-    block_index: int
-    reason: str
-
-class BlockEndEvent(BaseEvent):
-    block_index: int
-
-class TrialStartEvent(BaseEvent):
-    block_index: int
-    node_index: int
-    target: str
-
-class TrialAbortEvent(BaseEvent):
-    block_index: int
-    node_index: int
-    reason: str
-
-class TrialEndEvent(BaseEvent):
-    block_index: int
-    node_index: int
 
 class EventRecorder:
     """
@@ -62,9 +46,9 @@ class EventRecorder:
     """
 
     def __init__(self) -> None:
-        self._events: list[Event] = []
+        self._events: list[EventDict] = []
 
-    def emit(self, event: Event) -> None:
+    def emit(self, event: EventDict) -> None:
         """
         Record a new event.
 
@@ -72,7 +56,7 @@ class EventRecorder:
         """
         self._events.append(event)
 
-    def events(self) -> list[Event]:
+    def events(self) -> list[EventDict]:
         """
         Return the full event list.
 

@@ -1,9 +1,8 @@
-from psychopy import core
-from psychopy.visual.window import Window
+from mcj.adapters.psychopy.protocols import WindowLike
 
-def quit_psychopy(win: Window) -> None:
-    win.clearAutoDraw()
-    win.flip()
-    win.close()
-    core.quit()
+def quit_psychopy(win: WindowLike | None) -> None:
+    if win is not None:
+        win.clearAutoDraw()
+        win.flip()
+        win.close()
 

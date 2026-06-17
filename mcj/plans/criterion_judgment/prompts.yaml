@@ -1,0 +1,30 @@
+conditions:
+  domain:
+    prompt_frame: "Judge whether each of the following words refers to something that"
+    prompt: "is alive"
+
+  danger:
+    prompt_frame: "Judge whether each of the following words refers to something that"
+    prompt: "is more dangerous than a wasp"
+    definition: >
+      When assessing danger, consider how much harm the thing could cause.
+
+      For living things, consider how aggressive/defensive the creature would
+      be if you were to enter its space or engage with it in the wild, and
+      whether a bite from the creature could cause illness.
+
+      For non-living things, consider the likelihood of injury to yourself or
+      to others while using it for its intended purpose.
+
+  size:
+    prompt_frame: "Judge whether each of the following words refers to something that"
+    prompt: "can fit in a carry-on suitcase"
+    definition: >
+      Let your familiarity with carry-on suitcases guide your judgements.
+
+      For reference, carry-on suitcases are typically about 1 foot wide, 2 feet
+      tall, and less than a foot deep.
+
+  orthography:
+    prompt_frame: "Judge whether each of the following words is printed"
+    prompt: "in uppercase letters"
