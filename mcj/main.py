@@ -11,7 +11,8 @@ from mcj.config.experiment import EXPERIMENT_NAME
 
 # --- Runtime core ---
 from mcj.runtime.backend import RenderBackend
-from mcj.runtime.context import RuntimeContext
+from mcj.runtime.execution import ExecutionContext
+from mcj.runtime.session import SessionRuntime
 from mcj.runtime.exceptions import ExperimentAbort
 from mcj.runtime.emitters import (
     emit_session_start,
@@ -29,13 +30,15 @@ from mcj.tasks.criterion_judgment.display import (
     CriterionJudgmentDefinitionDisplay,
 )
 from mcj.tasks.criterion_judgment.config import  CriterionJudgmentTaskConfig
+from mcj.tasks.criterion_judgment.actions import CJAction
+from mcj.tasks.criterion_judgment import task as cj_task
 
 # --- UI / components ---
 from mcj.ui.dialogs import PsychoPyDialogProvider
 from mcj.dev.session_info import StaticSessionInfoProvider
 
 # --- Routines ---
-from mcj.tasks.criterion_judgment import task as cj_task
+from mcj.routines.instructions.actions import InstructionAction
 
 CriterionJudgmentDisplay = CriterionJudgmentPromptDisplay | CriterionJudgmentDefinitionDisplay
 
@@ -43,14 +46,14 @@ DEV_MODE = True
 RENDER_BACKEND = RenderBackend.FAKE
 
 if DEV_MODE or RENDER_BACKEND == RenderBackend.FAKE:
-    from mcj.dev.scripts import test_practice_script
+    from mcj.dev.scripts import test_scanner_script
 
     provider = StaticSessionInfoProvider({
         "subject_id": 999,
-        "mode": "practice",
+        "mode": "scanner",
         "role": "dev",
         "input_backend": "scripted",
-        "script": test_practice_script()
+        "script": test_scanner_script()
     })
 else:
     provider = PsychoPyDialogProvider()
@@ -65,11 +68,7 @@ def run():
         subject_id=session_info.subject_id,
     )
 
-    ctx, role_cfg, session_logger = build_session(session_info, backend=RENDER_BACKEND)
-
-    print(ctx.input_backend)
-    for term in role_cfg.termination_by_state.items():
-        print(term)
+    ctx, role_bundle, session_logger = build_session(session_info, backend=RENDER_BACKEND)
 
     factory, display = resolve_display(session_info, backend=RENDER_BACKEND, dev_mode=DEV_MODE)
 
@@ -101,7 +100,15 @@ def run():
     # =======================================
     try:
         # --- Bundle runtime context and configuration ---
-        run_ctx=RuntimeContext(ctx=ctx, role_cfg=role_cfg, mode=session_info.mode)
+        instruction_ctx = ExecutionContext[InstructionAction](
+            session=SessionRuntime(ctx=ctx, mode=session_info.mode),
+            role_cfg=role_bundle["instructions"],
+        )
+
+        task_ctx = ExecutionContext[CJAction](
+            session=SessionRuntime(ctx=ctx, mode=session_info.mode),
+            role_cfg=role_bundle["task"],
+        )
 
         run_cfg = CriterionJudgmentTaskConfig(
             instructions_path = {
@@ -111,7 +118,12 @@ def run():
             }[session_info.role]
         )
 
-        cj_task.run(factory, run_ctx=run_ctx, run_cfg=run_cfg)
+        cj_task.run(
+            factory,
+            instruction_ctx=instruction_ctx,
+            task_ctx=task_ctx,
+            run_cfg=run_cfg,
+        )
 
     except ExperimentAbort as e:
         end_reason = e.reason

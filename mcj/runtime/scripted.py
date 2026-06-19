@@ -81,7 +81,7 @@ class ScriptBuilder:
         return self
 
     def trigger(self, code: int = 4) -> "ScriptBuilder":
-        self._events.append(ScriptEvent(type="trigger", code=code))
+        self._events.append(ScriptEvent(type="trigger", code=str(code)))
         return self
 
     def repeat(self, n: int, fn: Callable[[ScriptBuilder], ScriptBuilder]) -> "ScriptBuilder":
@@ -119,10 +119,10 @@ def respond_right(s: ScriptBuilder):
     return s.press("j")
 
 def respond_left_cedrus(s: ScriptBuilder):
-    return s.trigger(1)
+    return s.press("0")
 
 def respond_right_cedrus(s: ScriptBuilder):
-    return s.trigger(3)
+    return s.press("2")
 
 def send_scanner_trigger(s: ScriptBuilder):
     return s.trigger(4)

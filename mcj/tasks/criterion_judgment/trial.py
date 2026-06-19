@@ -1,6 +1,7 @@
 from typing import Callable
 
-from mcj.runtime.context import RuntimeContext, SessionContext
+from mcj.runtime.execution import ExecutionContext
+from mcj.runtime.session import SessionContext
 from mcj.runtime.display_primitives import StimFactory
 from mcj.runtime.roles import RoleConfig
 from mcj.runtime.states import TrialState
@@ -18,9 +19,11 @@ from mcj.plans.criterion_judgment.schema import (
 )
 from mcj.plans.criterion_judgment.prompts_loader import load_prompt
 from mcj.tasks.criterion_judgment.timing import TrialTiming
+from mcj.tasks.criterion_judgment.actions import CJAction
 from mcj.tasks.criterion_judgment.mapping import (
-    EventMapping,
-    InputResponseMapping,
+    ActionMapping,
+    InputActionMapping,
+    make_side_to_response,
 )
 from mcj.tasks.criterion_judgment.display import (
     CriterionJudgmentStimulusDisplay as StimulusDisplay,
@@ -36,8 +39,9 @@ from mcj.tasks.criterion_judgment.emitters import (
     emit_stimulus_start, emit_stimulus_end,
     emit_feedback_start, emit_feedback_end,
     emit_response, emit_stimulus_onset,
-    emit_response_mark,
+    emit_response_mark, emit_action
 )
+from mcj.tasks.common.state_refs import ActionRef
 
 def emit_state_end(ctx: SessionContext, state: TrialState, reason: EndReason, cause: str | None) -> None:
     if state == TrialState.FIXATION:
@@ -55,17 +59,20 @@ def run_trial(
     block_index: int,
     trial_index: int,
     trial_timing: TrialTiming,
-    run_ctx: RuntimeContext,
+    run_ctx: ExecutionContext[CJAction],
 ) -> None:
-    ctx = run_ctx.ctx
+    session = run_ctx.session
+    ctx = session.ctx
     role_cfg = run_ctx.role_cfg
 
     # --- Build or select trial configuration ---
-    plan = run_ctx.ctx.get_plan_typed("criterion_judgment", CriterionJudgmentPlan)
+    plan = ctx.get_plan_typed("criterion_judgment", CriterionJudgmentPlan)
     block_plan = plan.blocks[block_index]
     condition = block_plan.condition
     expected_response = trial.expected_response(condition)
     prompt = load_prompt(condition)
+
+    side_to_response = make_side_to_response(plan.left_response)
     
     # --- Initialize displays
     fixation_display = FixationDisplay(factory)
@@ -73,12 +80,12 @@ def run_trial(
     feedback_display = FeedbackDisplay(factory)
 
     # --- Define how states transition ---
-    def get_next_state(state: TrialState, role_cfg: RoleConfig) -> TrialState:
+    def get_next_state(state: TrialState, role_cfg: RoleConfig[CJAction]) -> TrialState:
         if state == TrialState.FIXATION:
             return TrialState.STIMULUS
 
         if state == TrialState.STIMULUS:
-            if role_cfg.provide_feedback:
+            if role_cfg.has_feedback_cfg and session.mode.allows_feedback:
                 return TrialState.FEEDBACK
             return TrialState.DONE
 
@@ -88,16 +95,17 @@ def run_trial(
         raise RuntimeError(f"Unhandled state: {state}")
 
     # --- Define what each state is ---
-    def enter_state(state: TrialState, prev_state_had_response: bool, prev_response: Response | None) -> tuple[EventMapping, DonePredicate, Callable[[], None]]:
-        mapping_factory = role_cfg.event_mapping_by_state[state]
-        mapping = mapping_factory(run_ctx)
+    def enter_state(state: TrialState, last_action: ActionRef[CJAction], prev_response: Response | None) -> tuple[ActionMapping[CJAction], DonePredicate, Callable[[], None]]:
+        mapping_factory = role_cfg.action_mapping_by_state[state]
+        mapping = mapping_factory(session)
         scheduled_end_time = trial_timing.get_scheduled_end_time_for_state(state)
         termination = role_cfg.termination_by_state[state]
         done = termination.make_done_predicate(
             ctx.now,
             end_time_seconds=scheduled_end_time,
-            response_recorded_ref=lambda: prev_state_had_response
+            action_ref=lambda: last_action.get()
         )
+        print(done)
 
         if state == TrialState.FIXATION:
             emit_fixation_start(ctx)
@@ -106,12 +114,12 @@ def run_trial(
         elif state == TrialState.STIMULUS:
             stimulus_display.clear_response_mark()
 
-            assert isinstance(mapping, InputResponseMapping)
+            assert isinstance(mapping, InputActionMapping)
             stimulus_display.update(
                 cue_text=trial.word,
                 prompt_text=prompt.prompt,
-                left_text=mapping.side_to_response[ResponseSide.LEFT].value,
-                right_text=mapping.side_to_response[ResponseSide.RIGHT].value
+                left_text=side_to_response[ResponseSide.LEFT].value,
+                right_text=side_to_response[ResponseSide.RIGHT].value
             )
             draw = stimulus_display.draw
             emit_stimulus_start(
@@ -126,7 +134,7 @@ def run_trial(
 
         elif state == TrialState.FEEDBACK and role_cfg.feedback is not None:
             feedback_cfg = role_cfg.feedback
-            if prev_state_had_response:
+            if last_action.get() in (CJAction.LEFT, CJAction.RIGHT):
                 if expected_response == prev_response:
                     feedback_stimulus_cfg = feedback_cfg.stimulus_correct
                 else:
@@ -145,15 +153,19 @@ def run_trial(
 
     # --- Start Trial ---
     emit_trial_start(ctx, trial_index)
-    response_received = False
-    response = None
+
+    action: CJAction | None = None
+    last_action = ActionRef[CJAction]()
+
+    response: Response | None = None
+
     end_reason = EndReason.COMPLETE
     end_cause = None
 
     state = TrialState.FIXATION
     mapping, done, draw = enter_state(
         state,
-        prev_state_had_response=response_received,
+        last_action=last_action,
         prev_response=response
     )
 
@@ -176,15 +188,24 @@ def run_trial(
                         end_reason = EndReason.ABORTED
                         raise EscapePressed
 
-                    result = mapping.interpret(event)
-                    if result is not None and not response_received:
-                        response = Response(result)
-                        emit_response(ctx, response)
-                        response_received = True
+                    action = mapping.interpret(event)
+                    print(f"action={action}")
+                    if action is not None and last_action.get() is None:
+                        last_action.set(action)
+                        emit_action(ctx, action)
+                        print(f"last_action.get()={last_action.get()}")
 
-                        if role_cfg.should_show_response_mark(state):
-                            emit_response_mark(ctx)
-                            stimulus_display.mark_response(response.value)
+                        if last_action.get() in (CJAction.LEFT, CJAction.RIGHT):
+                            assert isinstance(mapping, InputActionMapping)
+
+                            side = ResponseSide.LEFT if action == CJAction.LEFT else ResponseSide.RIGHT
+                            response = side_to_response[side]
+
+                            emit_response(ctx, response)
+
+                            if role_cfg.should_show_response_mark(state):
+                                emit_response_mark(ctx)
+                                stimulus_display.mark_response(response.value)
                 else:
                     RuntimeError(f"Unhandled event type {event}")
 
@@ -200,10 +221,10 @@ def run_trial(
                 if state != TrialState.DONE:
                     mapping, done, draw = enter_state(
                         state,
-                        prev_state_had_response=response_received,
+                        last_action=last_action,
                         prev_response=response
                     )
-                    response_received = False
+                    last_action.clear()
                     response = None
 
 

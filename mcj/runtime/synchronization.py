@@ -3,7 +3,7 @@ import time
 from dataclasses import dataclass
 
 from mcj.runtime.time import Clock
-from mcj.runtime.context import SessionContext
+from mcj.runtime.session_context import SessionContext
 from mcj.runtime.emitters import emit_alignment_start, emit_alignment_end
 from mcj.runtime.end_reasons import EndReason
 from mcj.runtime.exceptions import ExperimentAbort, EscapePressed

@@ -1,11 +1,10 @@
-from mcj.runtime.context import RuntimeContext
+from mcj.runtime.execution import ExecutionContext
 from mcj.runtime.display_primitives import StimFactory
 from mcj.runtime.end_reasons import EndReason
 from mcj.runtime.emitters import (
     emit_button_event,
     emit_scanner_trigger,
 )
-from mcj.runtime.mapping import KeyPressMapping
 from mcj.runtime.input_events import TriggerEvent, ButtonEvent
 from mcj.plans.criterion_judgment.schema import (
     CriterionJudgmentPlan,
@@ -18,6 +17,7 @@ from mcj.tasks.criterion_judgment.emitters import (
     emit_definition_start,
     emit_definition_end,
 )
+from mcj.tasks.criterion_judgment.actions import CJAction
 from mcj.runtime.exceptions import EscapePressed
 from mcj.runtime.states import DefinitionState
 
@@ -25,9 +25,10 @@ def present_definition(
         factory: StimFactory,
         block_index:int,
         end_time: float | None,
-        run_ctx: RuntimeContext
+        run_ctx: ExecutionContext[CJAction]
     ):
-    ctx = run_ctx.ctx
+    session = run_ctx.session
+    ctx = session.ctx
     plan = ctx.get_plan_typed("criterion_judgment", CriterionJudgmentPlan)
     role_cfg = run_ctx.role_cfg
 
@@ -39,12 +40,13 @@ def present_definition(
     display = CriterionJudgmentDefinitionDisplay(factory)
 
     state = DefinitionState.DEFINITION
-    mapping = KeyPressMapping({"space"})
+    mapping_factory = role_cfg.action_mapping_by_state[state]
+    mapping = mapping_factory(run_ctx)
     termination = role_cfg.termination_by_state[state]
     done = termination.make_done_predicate(
         ctx.now,
         end_time_seconds=end_time,
-        response_recorded_ref=lambda: response_recorded
+        action_ref=lambda: last_action
     )
 
     if plan.left_response == Response.YES:
@@ -66,7 +68,7 @@ def present_definition(
 
     state = DefinitionState.DEFINITION
     emit_definition_start(ctx)
-    response_recorded = False
+    last_action: CJAction | None = None
     try:
         while True:
             ctx.input.update()
@@ -82,9 +84,7 @@ def present_definition(
                     if event.code == "escape":
                         raise EscapePressed
 
-                    result = mapping.interpret(event)
-                    if result is not None and not response_recorded:
-                        response_recorded = True
+                    last_action = mapping.interpret(event)
                         
             draw()
             factory.flip()

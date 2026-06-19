@@ -5,6 +5,8 @@ from dataclasses import dataclass
 from mcj.runtime.roles import RoleConfig
 from mcj.runtime.states import TrialState
 
+from mcj.tasks.criterion_judgment.actions import CJAction
+
 @dataclass(frozen=True)
 class TrialTiming:
     fixation_on: float | None
@@ -62,8 +64,8 @@ def make_empty_schedule(n_trials: int) -> list[TrialTiming]:
         for _ in range(n_trials)
     ]
 
-def build_schedule(t0: float, n_trials: int, role_cfg: RoleConfig) -> Sequence[TrialTiming]:
-    # The definition routine only happens in Practice mode, and is always ResponseTermination()
+def build_schedule(t0: float, n_trials: int, role_cfg: RoleConfig[CJAction]) -> Sequence[TrialTiming]:
+    # The definition routine only happens in Practice mode, and is always ActionTermination()
     prompt_duration = role_cfg.prompt_duration_seconds
     fixation_duration = role_cfg.fixation_duration_seconds
     stimulus_duration = role_cfg.stimulus_duration_seconds
@@ -86,7 +88,7 @@ def build_schedule(t0: float, n_trials: int, role_cfg: RoleConfig) -> Sequence[T
     t = t0
     t += prompt_duration
 
-    schedule = []
+    schedule: list[TrialTiming] = []
     for _ in range(n_trials):
         fixation_on = t
         t += fixation_duration

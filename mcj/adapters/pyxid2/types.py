@@ -1,4 +1,4 @@
-from typing import Generic, Protocol, TypedDict, TypeVar, Any, Callable
+from typing import Generic, Protocol, TypedDict, TypeVar, Any
 from dataclasses import dataclass
 
 from mcj.runtime.time import Clock

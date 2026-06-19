@@ -1,6 +1,6 @@
 from typing import Protocol, Literal, overload
 
-from mcj.runtime.context import SessionContext
+from mcj.runtime.session_context import SessionContext
 from mcj.runtime.end_reasons import EndReason
 
 class EmitterWithoutReason(Protocol):

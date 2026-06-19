@@ -5,7 +5,7 @@ from mcj.config.paths import paths
 
 from mcj.plans.criterion_judgment.loader import load_criterion_judgment_plan
 
-from mcj.runtime.context import SessionContext
+from mcj.runtime.session_context import SessionContext
 from mcj.runtime.events import SESSION_EVENTS, EventRecorder
 from mcj.runtime.modes import Mode
 from mcj.runtime.backend import RenderBackend

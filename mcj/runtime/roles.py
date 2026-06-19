@@ -1,3 +1,4 @@
+from typing import TypeVar, Generic
 from dataclasses import dataclass
 from enum import Enum
 from typing import Mapping
@@ -5,10 +6,12 @@ from typing import Mapping
 from mcj.runtime.states import State
 from mcj.runtime.termination import (
     TerminationCondition,
-    ResponseOrTimeoutTermination,
+    ActionOrTimeoutTermination,
     TimeTermination
 )
-from mcj.runtime.mapping import EventMappingByState
+from mcj.runtime.mapping import ActionMappingByState
+
+ActionT = TypeVar("ActionT")
 
 class PlanRole(str, Enum):
     MAIN="main"
@@ -36,9 +39,9 @@ class ResponseMarkConfig:
 
 
 @dataclass(frozen=True)
-class RoleConfig:
-    termination_by_state: Mapping[State, TerminationCondition]
-    event_mapping_by_state: EventMappingByState
+class RoleConfig(Generic[ActionT]):
+    termination_by_state: Mapping[State, TerminationCondition[ActionT]]
+    action_mapping_by_state: ActionMappingByState[ActionT]
     prompt_duration_seconds: float | None
     fixation_duration_seconds: float | None
     stimulus_duration_seconds: float | None
@@ -46,7 +49,7 @@ class RoleConfig:
     response_mark : ResponseMarkConfig | None
 
     @property
-    def provide_feedback(self) -> bool:
+    def has_feedback_cfg(self) -> bool:
         return self.feedback is not None
 
     def require_feedback(self) -> FeedbackConfig:
@@ -60,6 +63,6 @@ class RoleConfig:
     ) -> bool:
         return (
             self.response_mark is not None
-            and isinstance(self.termination_by_state[state], (TimeTermination, ResponseOrTimeoutTermination))
+            and isinstance(self.termination_by_state[state], (TimeTermination, ActionOrTimeoutTermination))
         )
 

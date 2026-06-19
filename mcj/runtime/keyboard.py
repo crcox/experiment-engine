@@ -52,6 +52,9 @@ class KeyboardAdapter(InputAdapter):
         """
         keys = get_keypresses(self._kb)
 
+        if keys is None:
+            return
+
         for k in keys:
             not_allowed = (
                 self._allowed_keys is not None

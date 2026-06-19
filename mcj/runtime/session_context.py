@@ -1,14 +1,10 @@
-from __future__ import annotations
-
 from dataclasses import dataclass
+from typing import Mapping, TypeVar, Type
 
 from mcj.runtime.time import Clock
-from mcj.plans.common import TaskPlan
-from mcj.runtime.modes import Mode
-from mcj.runtime.roles import RoleConfig
-from mcj.runtime.events import EventRecorder
 from mcj.runtime.input import InputManager, InputBackend
-from typing import Mapping, Type, TypeVar
+from mcj.runtime.events import EventRecorder
+from mcj.plans.common import TaskPlan
 
 T = TypeVar("T", bound=TaskPlan)
 
@@ -44,11 +40,4 @@ class SessionContext:
         plan = self.get_plan(task_code)
         assert isinstance(plan, cls)
         return plan
-
-
-@dataclass(frozen=True)
-class RuntimeContext:
-    ctx: SessionContext
-    role_cfg: RoleConfig
-    mode: Mode
 

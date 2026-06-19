@@ -2,7 +2,8 @@ from __future__ import annotations
 
 from mcj.instructions.loader import load_instructions
 from mcj.plans.criterion_judgment.schema import CriterionJudgmentPlan
-from mcj.runtime.context import RuntimeContext
+from mcj.routines.instructions.actions import InstructionAction
+from mcj.runtime.execution import ExecutionContext
 from mcj.runtime.modes import Mode
 from mcj.runtime.tasks import Task
 from mcj.runtime.exceptions import ExperimentAbort
@@ -10,24 +11,30 @@ from mcj.runtime.end_reasons import EndReason
 from mcj.runtime.synchronization import sync_cedrus_and_experiment_clocks
 from mcj.runtime.display_primitives import StimFactory
 
-from mcj.routines.instructions import present_instructions
+from mcj.routines.instructions.instructions import present_instructions
 
+from mcj.tasks.criterion_judgment.actions import CJAction
 from mcj.tasks.criterion_judgment.config import CriterionJudgmentTaskConfig
 from mcj.tasks.criterion_judgment.emitters import emit_task_start, emit_task_end
 
 from mcj.tasks.criterion_judgment.block import run_block
 
-def run(factory: StimFactory, run_ctx: RuntimeContext, run_cfg: CriterionJudgmentTaskConfig):
-    ctx = run_ctx.ctx
-    role_cfg = run_ctx.role_cfg
-    plan = ctx.get_plan_typed(
+
+def run(
+    factory: StimFactory,
+    instruction_ctx: ExecutionContext[InstructionAction],
+    task_ctx: ExecutionContext[CJAction],
+    run_cfg: CriterionJudgmentTaskConfig
+):
+    session = task_ctx.session
+    plan = session.ctx.get_plan_typed(
         Task.CRITERION_JUDGMENT,
         CriterionJudgmentPlan
     )
 
     instruction_slides = load_instructions(run_cfg.instructions_path)
 
-    emit_task_start(ctx)
+    emit_task_start(session.ctx)
     end_reason = EndReason.COMPLETE
     end_cause = None
     try:
@@ -35,21 +42,21 @@ def run(factory: StimFactory, run_ctx: RuntimeContext, run_cfg: CriterionJudgmen
         present_instructions(
             factory,
             slides=instruction_slides,
-            run_ctx=run_ctx,
+            run_ctx=instruction_ctx,
         )
         
         for block_index in range(plan.nblocks):
-            if run_ctx.mode == Mode.SCANNER:
-                alignment = sync_cedrus_and_experiment_clocks(ctx)
+            if session.mode == Mode.SCANNER:
+                alignment = sync_cedrus_and_experiment_clocks(session.ctx)
                 t0 = alignment.t0_system_s
             else:
-                t0 = ctx.now()
+                t0 = session.ctx.now()
 
             run_block(
                 factory,
                 block_index=block_index,
                 t0=t0,
-                run_ctx=run_ctx
+                run_ctx=task_ctx
             )
 
     except ExperimentAbort as e:
@@ -64,7 +71,7 @@ def run(factory: StimFactory, run_ctx: RuntimeContext, run_cfg: CriterionJudgmen
 
     finally:
         emit_task_end(
-            ctx,
+            session.ctx,
             reason=end_reason,
             cause=end_cause
         )

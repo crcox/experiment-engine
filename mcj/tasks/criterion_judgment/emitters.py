@@ -1,13 +1,14 @@
 from __future__ import annotations
 
 from mcj.runtime.emitter_factory import make_emitter
-from mcj.runtime.context import SessionContext
+from mcj.runtime.session_context import SessionContext
 from mcj.runtime.end_reasons import EndReason
 from mcj.runtime.tasks import Task
 from mcj.plans.criterion_judgment.schema import (
     CriterionJudgmentCondition,
     CriterionJudgmentResponse
 )
+from mcj.tasks.criterion_judgment.actions import CJAction
 
 # State emitters ----
 def emit_condition_set(
@@ -29,6 +30,16 @@ def emit_stimulus_onset(
         "time": ctx.now()
     })
 
+def emit_action(
+    ctx: SessionContext,
+    action: CJAction
+):
+    ctx.recorder.emit({
+        "type": "action",
+        "time": ctx.now(),
+        "action": action.value,
+    })
+
 def emit_response(
     ctx: SessionContext,
     response: CriterionJudgmentResponse
@@ -43,7 +54,7 @@ def emit_response_mark(
     ctx: SessionContext,
 ):
     ctx.recorder.emit({
-        "type": "response",
+        "type": "response_mark",
         "time": ctx.now(),
     })
 

@@ -1,4 +1,4 @@
-from mcj.runtime.scripted import ScriptBuilder, respond_left, fixation, feedback, sequence
+from mcj.runtime.scripted import ScriptBuilder, respond_left, fixation, feedback, respond_left_cedrus, sequence
 
 
 def test_practice_script():
@@ -15,7 +15,7 @@ def test_practice_script():
     )
 
 def test_scanner_script():
-    trial = sequence(fixation, respond_left)
+    trial = sequence(fixation, respond_left_cedrus)
 
     return (
         ScriptBuilder()

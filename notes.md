@@ -58,3 +58,11 @@ Flow:
 
 - 2026-06-15 12:05:51 — while working in C:\Users\chriscox\AppData\Local\nvim\lua\config\notes.lua
  Just checking that the whitespace problem is fixed! :) It is. 
+
+- 2026-06-17 18:21:03 — while working in c:\Users\chriscox\OneDrive - Louisiana State University\Research\MRI\Faith Coleman Semantic Warping\LSU Experiment Files\MCJ\mcj\tasks\criterion_judgment\block.py
+ The following functions may need to be Generic[ActionT] 
+from mcj.tasks.criterion_judgment.timing import build_schedule
+
+from mcj.tasks.criterion_judgment.prompt import present_prompt
+from mcj.tasks.criterion_judgment.definition import present_definition
+from mcj.tasks.criterion_judgment.trial import run_trial

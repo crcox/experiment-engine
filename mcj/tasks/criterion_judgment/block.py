@@ -2,8 +2,7 @@ from mcj.runtime.display_primitives import StimFactory
 from mcj.runtime.emitters import emit_block_start, emit_block_end
 from mcj.runtime.end_reasons import EndReason
 from mcj.runtime.exceptions import ExperimentAbort
-from mcj.runtime.context import RuntimeContext
-from mcj.runtime.modes import Mode
+from mcj.runtime.execution import ExecutionContext
 
 from mcj.plans.criterion_judgment.schema import CriterionJudgmentPlan
 from mcj.tasks.criterion_judgment.emitters import emit_condition_set
@@ -12,19 +11,21 @@ from mcj.tasks.criterion_judgment.timing import build_schedule
 from mcj.tasks.criterion_judgment.prompt import present_prompt
 from mcj.tasks.criterion_judgment.definition import present_definition
 from mcj.tasks.criterion_judgment.trial import run_trial
+from mcj.tasks.criterion_judgment.actions import CJAction
 
 def run_block(factory: StimFactory, *,
         block_index: int,
         t0: float,
-        run_ctx: RuntimeContext
+        run_ctx: ExecutionContext[CJAction]
 ) -> None:
-    ctx = run_ctx.ctx
+    session = run_ctx.session
+    ctx = session.ctx
     role_cfg = run_ctx.role_cfg
     session_plan = ctx.get_plan_typed("criterion_judgment", CriterionJudgmentPlan)
 
     # --- Build or select block configuration ---
     block_plan = session_plan.blocks[block_index]
-    mode = run_ctx.mode
+    mode = session.mode
     trial_timing = build_schedule(t0, block_plan.ntrials, role_cfg)
 
     # --- Start block ---
@@ -35,22 +36,14 @@ def run_block(factory: StimFactory, *,
     end_cause = None
 
     try:
-        if mode == Mode.SCANNER:
-            present_prompt(
-                factory,
-                block_index=block_index,
-                run_ctx=run_ctx,
-                end_time=trial_timing[0].fixation_on
-            )
+        present_prompt(
+            factory,
+            block_index=block_index,
+            run_ctx=run_ctx,
+            end_time=trial_timing[0].fixation_on
+        )
 
-        if mode == Mode.PRACTICE:
-            present_prompt(
-                factory,
-                block_index=block_index,
-                run_ctx=run_ctx,
-                end_time=None
-            )
-
+        if mode.allows_definition:
             present_definition(factory, block_index, end_time=None, run_ctx=run_ctx)
 
         for trial_index, trial in enumerate(block_plan.trials):

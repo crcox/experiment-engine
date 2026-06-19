@@ -23,7 +23,7 @@ from mcj.runtime.modes import Mode
 from mcj.runtime.roles import PlanRole
 from mcj.runtime.input_events import ButtonEvent, TriggerEvent
 from mcj.runtime.end_reasons import EndReason
-from mcj.runtime.context import SessionContext
+from mcj.runtime.session_context import SessionContext
 from mcj.runtime.emitter_factory import make_emitter, make_indexed_emitter
 
 
