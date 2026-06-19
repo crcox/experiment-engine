@@ -1,14 +1,14 @@
 from typing import Sequence
-from collections import deque
 
-from mcj.runtime.context import RuntimeContext
+from mcj.runtime.execution import ExecutionContext
 from mcj.runtime.display_primitives import StimFactory
 from mcj.runtime.emitters import emit_button_event, emit_scanner_trigger
 from mcj.instructions.schema import InstructionSlide
-from mcj.routines.emitters import (
+from mcj.routines.instructions.emitters import (
     emit_instruction_start, emit_instruction_end,
     emit_slide_start, emit_slide_end,
 )
+from mcj.routines.instructions.actions import InstructionAction
 from mcj.runtime.end_reasons import EndReason
 from mcj.runtime.exceptions import EscapePressed
 from mcj.runtime.input_events import TriggerEvent, ButtonEvent
@@ -19,19 +19,22 @@ from mcj.instructions.display import InstructionDisplay
 def present_instructions(
         factory: StimFactory,
         slides: Sequence[InstructionSlide],
-        run_ctx: RuntimeContext
+        run_ctx: ExecutionContext[InstructionAction]
     ):
-    ctx = run_ctx.ctx
+    session = run_ctx.session
+    ctx = session.ctx
+
     role_cfg = run_ctx.role_cfg
 
     display = InstructionDisplay(factory)
     state = InstructionState.INSTRUCTION
-    mapping_factory = role_cfg.event_mapping_by_state[state]
+    mapping_factory = role_cfg.action_mapping_by_state[state]
     mapping = mapping_factory(run_ctx)
 
     # --- Start Instructions
     index = 0
     emit_instruction_start(ctx)
+
 
     end_reason = EndReason.COMPLETE
     end_cause = None
@@ -45,7 +48,7 @@ def present_instructions(
             display.update(slide)
 
             events = ctx.input.pop_events()
-            advance = False
+            should_advance = False
 
             for event in events:
                 if isinstance(event, TriggerEvent):
@@ -57,16 +60,16 @@ def present_instructions(
                     if event.code == "escape":
                         raise EscapePressed
 
-                    result = mapping.interpret(event)
-                    if result is not None:
-                        advance = True
+                    action = mapping.interpret(event)
+                    if action == InstructionAction.ADVANCE:
+                        should_advance = True
                         break # one transition per frame
 
                         
             display.draw()
             factory.flip()
 
-            if advance:
+            if should_advance:
                 emit_slide_end(ctx)
                 index += 1
 
