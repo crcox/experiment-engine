@@ -1,4 +1,4 @@
-from mcj.runtime.roles import FeedbackStimulusConfig, ResponseMarkConfig
+from mcj.runtime.profiles import FeedbackStimulusConfig, ResponseMarkConfig
 from mcj.runtime.display_primitives import StimFactory
 
 TASK="criterion_judgment"

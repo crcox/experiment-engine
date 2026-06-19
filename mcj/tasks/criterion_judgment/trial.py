@@ -3,7 +3,7 @@ from typing import Callable
 from mcj.runtime.execution import ExecutionContext
 from mcj.runtime.session import SessionContext
 from mcj.runtime.display_primitives import StimFactory
-from mcj.runtime.roles import RoleConfig
+from mcj.runtime.profiles import RoleConfig
 from mcj.runtime.states import TrialState
 from mcj.runtime.termination import DonePredicate
 from mcj.runtime.end_reasons import EndReason
@@ -63,7 +63,7 @@ def run_trial(
 ) -> None:
     session = run_ctx.session
     ctx = session.ctx
-    role_cfg = run_ctx.role_cfg
+    profile_cfg = run_ctx.profile_cfg
 
     # --- Build or select trial configuration ---
     plan = ctx.get_plan_typed("criterion_judgment", CriterionJudgmentPlan)
@@ -76,16 +76,16 @@ def run_trial(
     
     # --- Initialize displays
     fixation_display = FixationDisplay(factory)
-    stimulus_display = StimulusDisplay(factory, role_cfg.response_mark)
+    stimulus_display = StimulusDisplay(factory, profile_cfg.response_mark)
     feedback_display = FeedbackDisplay(factory)
 
     # --- Define how states transition ---
-    def get_next_state(state: TrialState, role_cfg: RoleConfig[CJAction]) -> TrialState:
+    def get_next_state(state: TrialState, profile_cfg: RoleConfig[CJAction]) -> TrialState:
         if state == TrialState.FIXATION:
             return TrialState.STIMULUS
 
         if state == TrialState.STIMULUS:
-            if role_cfg.has_feedback_cfg and session.mode.allows_feedback:
+            if profile_cfg.has_feedback_cfg and session.environment.allows_feedback:
                 return TrialState.FEEDBACK
             return TrialState.DONE
 
@@ -96,10 +96,10 @@ def run_trial(
 
     # --- Define what each state is ---
     def enter_state(state: TrialState, last_action: ActionRef[CJAction], prev_response: Response | None) -> tuple[ActionMapping[CJAction], DonePredicate, Callable[[], None]]:
-        mapping_factory = role_cfg.action_mapping_by_state[state]
+        mapping_factory = profile_cfg.action_mapping_by_state[state]
         mapping = mapping_factory(session)
         scheduled_end_time = trial_timing.get_scheduled_end_time_for_state(state)
-        termination = role_cfg.termination_by_state[state]
+        termination = profile_cfg.termination_by_state[state]
         done = termination.make_done_predicate(
             ctx.now,
             end_time_seconds=scheduled_end_time,
@@ -132,8 +132,8 @@ def run_trial(
             )
             factory.call_on_flip(emit_stimulus_onset, ctx)
 
-        elif state == TrialState.FEEDBACK and role_cfg.feedback is not None:
-            feedback_cfg = role_cfg.feedback
+        elif state == TrialState.FEEDBACK and profile_cfg.feedback is not None:
+            feedback_cfg = profile_cfg.feedback
             if last_action.get() in (CJAction.LEFT, CJAction.RIGHT):
                 if expected_response == prev_response:
                     feedback_stimulus_cfg = feedback_cfg.stimulus_correct
@@ -203,7 +203,7 @@ def run_trial(
 
                             emit_response(ctx, response)
 
-                            if role_cfg.should_show_response_mark(state):
+                            if profile_cfg.should_show_response_mark(state):
                                 emit_response_mark(ctx)
                                 stimulus_display.mark_response(response.value)
                 else:
@@ -216,7 +216,7 @@ def run_trial(
             # --- state transitions ---
             if done():
                 emit_state_end(ctx, state, end_reason, end_cause)
-                state = get_next_state(state, role_cfg)
+                state = get_next_state(state, profile_cfg)
 
                 if state != TrialState.DONE:
                     mapping, done, draw = enter_state(

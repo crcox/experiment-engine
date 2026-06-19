@@ -2,7 +2,7 @@ from typing import Sequence
 
 from dataclasses import dataclass
 
-from mcj.runtime.roles import RoleConfig
+from mcj.runtime.profiles import RoleConfig
 from mcj.runtime.states import TrialState
 
 from mcj.tasks.criterion_judgment.actions import CJAction
@@ -64,16 +64,16 @@ def make_empty_schedule(n_trials: int) -> list[TrialTiming]:
         for _ in range(n_trials)
     ]
 
-def build_schedule(t0: float, n_trials: int, role_cfg: RoleConfig[CJAction]) -> Sequence[TrialTiming]:
-    # The definition routine only happens in Practice mode, and is always ActionTermination()
-    prompt_duration = role_cfg.prompt_duration_seconds
-    fixation_duration = role_cfg.fixation_duration_seconds
-    stimulus_duration = role_cfg.stimulus_duration_seconds
+def build_schedule(t0: float, n_trials: int, profile_cfg: RoleConfig[CJAction]) -> Sequence[TrialTiming]:
+    # The definition routine only happens in Practice environment, and is always ActionTermination()
+    prompt_duration = profile_cfg.prompt_duration_seconds
+    fixation_duration = profile_cfg.fixation_duration_seconds
+    stimulus_duration = profile_cfg.stimulus_duration_seconds
 
     durations: list[float|None] = [prompt_duration, fixation_duration, stimulus_duration]
     
-    if role_cfg.feedback is not None:
-        feedback_duration = role_cfg.feedback.duration_seconds
+    if profile_cfg.feedback is not None:
+        feedback_duration = profile_cfg.feedback.duration_seconds
         durations.append(feedback_duration)
 
     schedule_valid = not any(d is None for d in durations)
@@ -97,9 +97,9 @@ def build_schedule(t0: float, n_trials: int, role_cfg: RoleConfig[CJAction]) -> 
         t += stimulus_duration
 
         stimulus_off = t
-        if role_cfg.feedback is not None:
-            if role_cfg.feedback.duration_seconds is not None:
-                t += role_cfg.feedback.duration_seconds
+        if profile_cfg.feedback is not None:
+            if profile_cfg.feedback.duration_seconds is not None:
+                t += profile_cfg.feedback.duration_seconds
                 feedback_off = t
             else:
                 feedback_off = None

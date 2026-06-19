@@ -59,7 +59,7 @@ Adapters sit outside the main execution pipeline and are injected during setup.
                            ↓
                 ┌────────────────────────────┐
                 │ runtime core               │
-                │ (mapping, roles, term)     │
+                │ (mapping, profiles, term)     │
                 └──────────┬─────────────────┘
                            ↓
                 ┌────────────────────────────┐

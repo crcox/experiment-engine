@@ -1,7 +1,7 @@
 import json
 from mcj.config.paths import paths
 from mcj.stimuli.schema import WordTable
-from mcj.runtime.roles import PlanRole
+from mcj.runtime.profiles import TaskProfile
 from mcj.runtime.ids import make_subject_code
 from mcj.plans.criterion_judgment.schema import (
     CriterionJudgmentPlan,
@@ -43,7 +43,7 @@ def _build_criterion_judgment_plan(data: dict[str, Any], *, word_table: WordTabl
     )
 
 
-def load_criterion_judgment_plan(role: PlanRole, subject_id: int, word_table: WordTable) -> CriterionJudgmentPlan:
+def load_criterion_judgment_plan(profile: TaskProfile, subject_id: int, word_table: WordTable) -> CriterionJudgmentPlan:
     """
     Load and validate a CriterionJudgmentPlan from a JSON file.
 
@@ -60,15 +60,15 @@ def load_criterion_judgment_plan(role: PlanRole, subject_id: int, word_table: Wo
             If the file is missing required keys or contains invalid types.
     """
     
-    if role == PlanRole.PRACTICE:
+    if profile == TaskProfile.PRACTICE:
         path = paths.ASSETS / "practice" / "practice.json"
-    elif role == PlanRole.MAIN:
+    elif profile == TaskProfile.MAIN:
         subject_code = make_subject_code(subject_id)
         path = paths.ASSETS / "subjects" / f"{subject_code}.json"
-    elif role == PlanRole.DEV:
+    elif profile == TaskProfile.DEV:
         path = paths.ASSETS / "practice" / "practice.json"
     else:
-        raise RuntimeError(f"Unhandled role {role!r}")
+        raise RuntimeError(f"Unhandled profile {profile!r}")
 
     with path.open("r", encoding="utf-8") as f:
         data = json.load(f)

@@ -24,11 +24,11 @@ def present_instructions(
     session = run_ctx.session
     ctx = session.ctx
 
-    role_cfg = run_ctx.role_cfg
+    profile_cfg = run_ctx.profile_cfg
 
     display = InstructionDisplay(factory)
     state = InstructionState.INSTRUCTION
-    mapping_factory = role_cfg.action_mapping_by_state[state]
+    mapping_factory = profile_cfg.action_mapping_by_state[state]
     mapping = mapping_factory(run_ctx)
 
     # --- Start Instructions

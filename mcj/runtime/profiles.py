@@ -13,7 +13,7 @@ from mcj.runtime.mapping import ActionMappingByState
 
 ActionT = TypeVar("ActionT")
 
-class PlanRole(str, Enum):
+class TaskProfile(str, Enum):
     MAIN="main"
     PRACTICE="practice"
     DEV="dev"

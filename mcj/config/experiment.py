@@ -1,27 +1,27 @@
 from __future__ import annotations
 
-from mcj.runtime.modes import Mode
+from mcj.runtime.environments import Environment
 from mcj.runtime.input import InputBackend, InputChannel, AdapterType
-from mcj.runtime.roles import PlanRole
+from mcj.runtime.profiles import TaskProfile
 from mcj.runtime.config_types import RoleBundle
 
 from mcj.routines.instructions.config import (
-    build_instruction_role_config,
+    build_instruction_profile_config,
 )
 from mcj.tasks.criterion_judgment.config import (
-    build_practice_role_config,
-    build_main_role_config,
-    build_dev_role_config,
+    build_practice_profile_config,
+    build_main_profile_config,
+    build_dev_profile_config,
 )
 
 
 EXPERIMENT_NAME: str = "Multi-Criterion Judgment Task"
 
-MODE_CHANNELS = {
-    Mode.PRACTICE: [
+ENVIRONMENT_CHANNELS = {
+    Environment.PRACTICE: [
         InputChannel.KEYBOARD
     ],
-    Mode.SCANNER: [
+    Environment.SCANNER: [
         InputChannel.KEYBOARD,
         InputChannel.CEDRUS,
     ],
@@ -39,18 +39,18 @@ CHANNEL_IMPLEMENTATIONS = {
 }
 
 
-CONFIG_BY_ROLE: dict[PlanRole, RoleBundle]  = {
-    PlanRole.PRACTICE: {
-        "instructions": build_instruction_role_config(),
-        "task": build_practice_role_config(),
+CONFIG_BY_PROFILE: dict[TaskProfile, RoleBundle]  = {
+    TaskProfile.PRACTICE: {
+        "instructions": build_instruction_profile_config(),
+        "task": build_practice_profile_config(),
     },
-    PlanRole.MAIN: {
-        "instructions": build_instruction_role_config(),
-        "task": build_main_role_config(),
+    TaskProfile.MAIN: {
+        "instructions": build_instruction_profile_config(),
+        "task": build_main_profile_config(),
     },
-    PlanRole.DEV: {
-        "instructions": build_instruction_role_config(),
-        "task": build_dev_role_config(),
+    TaskProfile.DEV: {
+        "instructions": build_instruction_profile_config(),
+        "task": build_dev_profile_config(),
     },
 }
 

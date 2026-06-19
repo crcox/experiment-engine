@@ -1,13 +1,13 @@
 from enum import Enum
 
-class Mode(str, Enum):
+class Environment(str, Enum):
     PRACTICE = "practice"
     SCANNER = "scanner"
 
     @property
     def allows_feedback(self) -> bool:
-        return self != Mode.SCANNER
+        return self != Environment.SCANNER
 
     @property
     def allows_definition(self) -> bool:
-        return self != Mode.SCANNER
+        return self != Environment.SCANNER

@@ -30,7 +30,7 @@ def present_definition(
     session = run_ctx.session
     ctx = session.ctx
     plan = ctx.get_plan_typed("criterion_judgment", CriterionJudgmentPlan)
-    role_cfg = run_ctx.role_cfg
+    profile_cfg = run_ctx.profile_cfg
 
     # --- Build or select prompt configuration ---
 
@@ -40,9 +40,9 @@ def present_definition(
     display = CriterionJudgmentDefinitionDisplay(factory)
 
     state = DefinitionState.DEFINITION
-    mapping_factory = role_cfg.action_mapping_by_state[state]
+    mapping_factory = profile_cfg.action_mapping_by_state[state]
     mapping = mapping_factory(run_ctx)
-    termination = role_cfg.termination_by_state[state]
+    termination = profile_cfg.termination_by_state[state]
     done = termination.make_done_predicate(
         ctx.now,
         end_time_seconds=end_time,

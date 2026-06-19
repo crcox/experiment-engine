@@ -33,7 +33,7 @@ class CedrusAdapter(InputAdapter):
 
     Invariant:
     - Only aligned events are emitted
-    - Unaligned events are dropped (optionally logged in debug mode)
+    - Unaligned events are dropped (optionally logged in debug environment)
     """
     _clock: Clock
     _dev: XidDeviceLike

@@ -18,7 +18,7 @@ def emit_condition_set(
     ctx.recorder.emit({
         "type": "condition_set",
         "time": ctx.now(),
-        "mode": condition.value,
+        "environment": condition.value,
     })
 
 # Instantaneous events ----

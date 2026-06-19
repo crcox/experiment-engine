@@ -19,8 +19,8 @@ from __future__ import annotations
 # It will make your life easier when parsing the event record if each event is
 # a flat structure. Avoid nesting lists and dictionaries within event fields
 # unless it is absolutely necessary.
-from mcj.runtime.modes import Mode
-from mcj.runtime.roles import PlanRole
+from mcj.runtime.environments import Environment
+from mcj.runtime.profiles import TaskProfile
 from mcj.runtime.input_events import ButtonEvent, TriggerEvent
 from mcj.runtime.end_reasons import EndReason
 from mcj.runtime.session_context import SessionContext
@@ -52,23 +52,23 @@ def emit_scanner_trigger(
     })
 
 # State emitters ----
-def emit_mode_set(
+def emit_environment_set(
     ctx: SessionContext,
-    mode: Mode
+    environment: Environment
 ):
     ctx.recorder.emit({
-        "type": "mode_set",
-        "mode": mode.value,
+        "type": "environment_set",
+        "environment": environment.value,
         "time": ctx.now()
     })
 
-def emit_role_set(
+def emit_profile_set(
     ctx: SessionContext,
-    role: PlanRole
+    profile: TaskProfile
 ):
     ctx.recorder.emit({
-        "type": "role_set",
-        "role": role.value,
+        "type": "profile_set",
+        "profile": profile.value,
         "time": ctx.now()
     })
 

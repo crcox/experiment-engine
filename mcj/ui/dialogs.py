@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from mcj.runtime.modes import Mode
+from mcj.runtime.environments import Environment
 from mcj.runtime.session_info import SessionInfoProvider, SessionInfo, parse_session_info
 
 
@@ -24,7 +24,7 @@ class PsychoPyDialogProvider(SessionInfoProvider):
         # dialog box
         ui_info: dict[str, str | list[str]] = {
             "subject_id": "",
-            "mode": [m.value for m in Mode]
+            "environment": [m.value for m in Environment]
         }
 
         dlg = gui.DlgFromDict(

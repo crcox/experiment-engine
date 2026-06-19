@@ -4,7 +4,7 @@ from mcj.instructions.loader import load_instructions
 from mcj.plans.criterion_judgment.schema import CriterionJudgmentPlan
 from mcj.routines.instructions.actions import InstructionAction
 from mcj.runtime.execution import ExecutionContext
-from mcj.runtime.modes import Mode
+from mcj.runtime.environments import Environment
 from mcj.runtime.tasks import Task
 from mcj.runtime.exceptions import ExperimentAbort
 from mcj.runtime.end_reasons import EndReason
@@ -46,7 +46,7 @@ def run(
         )
         
         for block_index in range(plan.nblocks):
-            if session.mode == Mode.SCANNER:
+            if session.environment == Environment.SCANNER:
                 alignment = sync_cedrus_and_experiment_clocks(session.ctx)
                 t0 = alignment.t0_system_s
             else:

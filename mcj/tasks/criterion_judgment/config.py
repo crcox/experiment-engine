@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from mcj.runtime.config_types import RoleBundle
-from mcj.runtime.roles import RoleConfig, FeedbackConfig, FeedbackStimulusConfig, ResponseMarkConfig
+from mcj.runtime.profiles import RoleConfig, FeedbackConfig, FeedbackStimulusConfig, ResponseMarkConfig
 from mcj.runtime.mapping import key_mapping, dynamic_mapping, no_op
 from mcj.runtime.states import TrialState, PromptState, DefinitionState
 from mcj.runtime.termination import TimeTermination, ActionTermination, ActionOrTimeoutTermination
@@ -18,7 +18,7 @@ class CriterionJudgmentTaskConfig:
 def get_task_config(bundle: RoleBundle) -> RoleConfig[CJAction]:
     return bundle["task"]
 
-def build_practice_role_config() -> RoleConfig[CJAction]:
+def build_practice_profile_config() -> RoleConfig[CJAction]:
     return RoleConfig(
         termination_by_state={
             PromptState.PROMPT: ActionTermination({CJAction.ADVANCE}),
@@ -47,7 +47,7 @@ def build_practice_role_config() -> RoleConfig[CJAction]:
     )
 
 
-def build_main_role_config() -> RoleConfig[CJAction]:
+def build_main_profile_config() -> RoleConfig[CJAction]:
     return RoleConfig(
         termination_by_state={
             PromptState.PROMPT: TimeTermination(),
@@ -69,7 +69,7 @@ def build_main_role_config() -> RoleConfig[CJAction]:
     )
 
 
-def build_dev_role_config() -> RoleConfig[CJAction]:
+def build_dev_profile_config() -> RoleConfig[CJAction]:
     return RoleConfig(
         termination_by_state={
             PromptState.PROMPT: ActionTermination({CJAction.ADVANCE}),

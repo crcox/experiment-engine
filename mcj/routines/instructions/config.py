@@ -1,5 +1,5 @@
 from mcj.runtime.config_types import RoleBundle
-from mcj.runtime.roles import RoleConfig
+from mcj.runtime.profiles import RoleConfig
 from mcj.runtime.states import InstructionState
 from mcj.runtime.mapping import key_mapping
 from mcj.runtime.termination import ActionTermination
@@ -8,7 +8,7 @@ from mcj.routines.instructions.actions import InstructionAction
 def get_task_config(bundle: RoleBundle) -> RoleConfig[InstructionAction]:
     return bundle["instructions"]
 
-def build_instruction_role_config() -> RoleConfig[InstructionAction]:
+def build_instruction_profile_config() -> RoleConfig[InstructionAction]:
     return RoleConfig(
         termination_by_state={
             InstructionState.INSTRUCTION: ActionTermination({InstructionAction.ADVANCE}),

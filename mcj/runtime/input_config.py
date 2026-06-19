@@ -6,7 +6,7 @@ from mcj.runtime.scripted import ScriptedInputAdapter
 from mcj.runtime.session_info import SessionInfo
 from mcj.runtime.time import Clock
 
-from mcj.config.experiment import MODE_CHANNELS, CHANNEL_IMPLEMENTATIONS
+from mcj.config.experiment import ENVIRONMENT_CHANNELS, CHANNEL_IMPLEMENTATIONS
 
 from mcj.xid.mock import MockXidDevice
 
@@ -21,7 +21,7 @@ def resolve_input_adapters(session_info: SessionInfo, clock: Clock) -> list[Inpu
         ]
 
     # --- otherwise: compose channels
-    channels = MODE_CHANNELS[session_info.mode]
+    channels = ENVIRONMENT_CHANNELS[session_info.environment]
 
     adapters = []
     for channel in channels:

@@ -17,11 +17,11 @@ from mcj.runtime.exceptions import ExperimentAbort
 from mcj.runtime.emitters import (
     emit_session_start,
     emit_session_end,
-    emit_mode_set,
-    emit_role_set,
+    emit_environment_set,
+    emit_profile_set,
 )
 from mcj.runtime.end_reasons import EndReason
-from mcj.runtime.roles import PlanRole
+from mcj.runtime.profiles import TaskProfile
 from mcj.runtime.setup import build_session, resolve_display
 
 # --- Task Runtime and Configuration ---
@@ -42,16 +42,16 @@ from mcj.routines.instructions.actions import InstructionAction
 
 CriterionJudgmentDisplay = CriterionJudgmentPromptDisplay | CriterionJudgmentDefinitionDisplay
 
-DEV_MODE = True
+DEV_ENVIRONMENT = True
 RENDER_BACKEND = RenderBackend.FAKE
 
-if DEV_MODE or RENDER_BACKEND == RenderBackend.FAKE:
+if DEV_ENVIRONMENT or RENDER_BACKEND == RenderBackend.FAKE:
     from mcj.dev.scripts import test_scanner_script
 
     provider = StaticSessionInfoProvider({
         "subject_id": 999,
-        "mode": "scanner",
-        "role": "dev",
+        "environment": "scanner",
+        "profile": "dev",
         "input_backend": "scripted",
         "script": test_scanner_script()
     })
@@ -68,9 +68,9 @@ def run():
         subject_id=session_info.subject_id,
     )
 
-    ctx, role_bundle, session_logger = build_session(session_info, backend=RENDER_BACKEND)
+    ctx, profile_bundle, session_logger = build_session(session_info, backend=RENDER_BACKEND)
 
-    factory, display = resolve_display(session_info, backend=RENDER_BACKEND, dev_mode=DEV_MODE)
+    factory, display = resolve_display(session_info, backend=RENDER_BACKEND, dev_environment=DEV_ENVIRONMENT)
 
     # --- Write session.json ---
     paths.DATA.mkdir(parents=True, exist_ok=True)
@@ -79,8 +79,8 @@ def run():
             "type": "session_start",
             "time": ctx.now(),
             "subject_id": session_info.subject_id,
-            "role": session_info.role.value,
-            "mode": session_info.mode.value,
+            "profile": session_info.task_profile.value,
+            "environment": session_info.environment.value,
             "input_backend": session_info.input_backend.value,
             "display": display.to_dict(),
             "psychopy_version": factory.version(),
@@ -89,8 +89,8 @@ def run():
 
     # --- Start Session ---
     emit_session_start(ctx)
-    emit_mode_set(ctx, session_info.mode)
-    emit_role_set(ctx, session_info.role)
+    emit_environment_set(ctx, session_info.environment)
+    emit_profile_set(ctx, session_info.task_profile)
 
     end_reason = EndReason.COMPLETE
     end_cause = None
@@ -101,21 +101,21 @@ def run():
     try:
         # --- Bundle runtime context and configuration ---
         instruction_ctx = ExecutionContext[InstructionAction](
-            session=SessionRuntime(ctx=ctx, mode=session_info.mode),
-            role_cfg=role_bundle["instructions"],
+            session=SessionRuntime(ctx=ctx, environment=session_info.environment),
+            profile_cfg=profile_bundle["instructions"],
         )
 
         task_ctx = ExecutionContext[CJAction](
-            session=SessionRuntime(ctx=ctx, mode=session_info.mode),
-            role_cfg=role_bundle["task"],
+            session=SessionRuntime(ctx=ctx, environment=session_info.environment),
+            profile_cfg=profile_bundle["task"],
         )
 
         run_cfg = CriterionJudgmentTaskConfig(
             instructions_path = {
-                PlanRole.PRACTICE: paths.INSTRUCTIONS / "practice.yaml",
-                PlanRole.MAIN: paths.INSTRUCTIONS / "main.yaml",
-                PlanRole.DEV: paths.INSTRUCTIONS / "practice.yaml",
-            }[session_info.role]
+                TaskProfile.PRACTICE: paths.INSTRUCTIONS / "practice.yaml",
+                TaskProfile.MAIN: paths.INSTRUCTIONS / "main.yaml",
+                TaskProfile.DEV: paths.INSTRUCTIONS / "practice.yaml",
+            }[session_info.task_profile]
         )
 
         cj_task.run(

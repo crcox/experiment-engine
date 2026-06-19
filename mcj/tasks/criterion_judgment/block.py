@@ -20,13 +20,13 @@ def run_block(factory: StimFactory, *,
 ) -> None:
     session = run_ctx.session
     ctx = session.ctx
-    role_cfg = run_ctx.role_cfg
+    profile_cfg = run_ctx.profile_cfg
     session_plan = ctx.get_plan_typed("criterion_judgment", CriterionJudgmentPlan)
 
     # --- Build or select block configuration ---
     block_plan = session_plan.blocks[block_index]
-    mode = session.mode
-    trial_timing = build_schedule(t0, block_plan.ntrials, role_cfg)
+    environment = session.environment
+    trial_timing = build_schedule(t0, block_plan.ntrials, profile_cfg)
 
     # --- Start block ---
     emit_block_start(ctx, block_index)
@@ -43,7 +43,7 @@ def run_block(factory: StimFactory, *,
             end_time=trial_timing[0].fixation_on
         )
 
-        if mode.allows_definition:
+        if environment.allows_definition:
             present_definition(factory, block_index, end_time=None, run_ctx=run_ctx)
 
         for trial_index, trial in enumerate(block_plan.trials):

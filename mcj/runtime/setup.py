@@ -1,13 +1,13 @@
 from typing import Callable
 
-from mcj.config.experiment import CONFIG_BY_ROLE
+from mcj.config.experiment import CONFIG_BY_PROFILE
 from mcj.config.paths import paths
 
 from mcj.plans.criterion_judgment.loader import load_criterion_judgment_plan
 
 from mcj.runtime.session_context import SessionContext
 from mcj.runtime.events import SESSION_EVENTS, EventRecorder
-from mcj.runtime.modes import Mode
+from mcj.runtime.environments import Environment
 from mcj.runtime.backend import RenderBackend
 from mcj.runtime.display_profile import (
     LAPTOP_DISPLAY,
@@ -30,7 +30,7 @@ from mcj.adapters.fake.display import FakeFactory
 
 def build_session(session_info: SessionInfo, backend: RenderBackend):
 
-    role = session_info.role
+    profile = session_info.task_profile
 
     word_table = load_word_metadata_csv()
 
@@ -46,7 +46,7 @@ def build_session(session_info: SessionInfo, backend: RenderBackend):
     ctx = SessionContext(
         _plans={
             'criterion_judgment': load_criterion_judgment_plan(
-                role=role,
+                profile=profile,
                 subject_id=session_info.subject_id,
                 word_table=word_table
             )
@@ -57,8 +57,8 @@ def build_session(session_info: SessionInfo, backend: RenderBackend):
         recorder=EventRecorder(),
     )
 
-    # --- Configure trial modes ---
-    cfg = CONFIG_BY_ROLE[role]
+    # --- Configure trial environments ---
+    cfg = CONFIG_BY_PROFILE[profile]
 
     # --- Instantiate loggers ---
     session_logger = EventTypeLogger(
@@ -69,18 +69,18 @@ def build_session(session_info: SessionInfo, backend: RenderBackend):
     return ctx, cfg, session_logger
 
 
-def resolve_display(session_info: SessionInfo, backend: RenderBackend, dev_mode: bool=False):
+def resolve_display(session_info: SessionInfo, backend: RenderBackend, dev_environment: bool=False):
     if backend == RenderBackend.PSYCHOPY:
-        if session_info.mode == Mode.PRACTICE:
+        if session_info.environment == Environment.PRACTICE:
             display = LAPTOP_DISPLAY
-        elif session_info.mode == Mode.SCANNER:
-            if dev_mode:
+        elif session_info.environment == Environment.SCANNER:
+            if dev_environment:
                 display = SCANNER_DEBUG
             else:
                 display = SCANNER_DISPLAY
 
         else:
-            raise RuntimeError(f"Unhandled mode={session_info.mode}")
+            raise RuntimeError(f"Unhandled environment={session_info.environment}")
 
         from psychopy.visual.window import Window
 

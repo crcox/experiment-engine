@@ -3,7 +3,7 @@ from typing import Mapping
 
 from mcj.runtime.session import SessionRuntime
 from mcj.runtime.mapping import ActionMapping
-from mcj.runtime.modes import Mode
+from mcj.runtime.environments import Environment
 from mcj.runtime.input_events import ButtonEvent
 from mcj.plans.criterion_judgment.schema import (
     CriterionJudgmentResponse as Response,
@@ -11,12 +11,12 @@ from mcj.plans.criterion_judgment.schema import (
 )
 from mcj.tasks.criterion_judgment.actions import CJAction
 
-CODE_TO_SIDE_BY_MODE = {
-    Mode.SCANNER: {
+CODE_TO_SIDE_BY_ENVIRONMENT = {
+    Environment.SCANNER: {
         '0': ResponseSide.LEFT,
         '2': ResponseSide.RIGHT,
     },
-    Mode.PRACTICE: {
+    Environment.PRACTICE: {
         'f': ResponseSide.LEFT,
         'j': ResponseSide.RIGHT,
     }
@@ -52,6 +52,6 @@ def make_side_to_response(left_response: Response) -> dict[ResponseSide, Respons
 
 def build_action_mapping(session: SessionRuntime) -> InputActionMapping:
     return InputActionMapping(
-        code_to_side=CODE_TO_SIDE_BY_MODE[session.mode],
+        code_to_side=CODE_TO_SIDE_BY_ENVIRONMENT[session.environment],
     )
 
