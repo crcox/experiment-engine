@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from mcj.runtime.recorders import RecorderAdapter
+
 EventDict = dict[str, object]
 
 SESSION_EVENTS = {
@@ -45,8 +47,9 @@ class EventRecorder:
     Consumers (loggers) read incrementally using cursors.
     """
 
-    def __init__(self) -> None:
+    def __init__(self, adapters: tuple[RecorderAdapter, ...] = ()) -> None:
         self._events: list[EventDict] = []
+        self._adapters = adapters
 
     def emit(self, event: EventDict) -> None:
         """
@@ -55,6 +58,9 @@ class EventRecorder:
         Events must be JSON-serializable dicts.
         """
         self._events.append(event)
+
+        for adapter in self._adapters:
+            adapter.handle_event(event)
 
     def events(self) -> list[EventDict]:
         """

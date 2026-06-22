@@ -5,6 +5,7 @@ from mcj.config.paths import paths
 
 from mcj.plans.criterion_judgment.loader import load_criterion_judgment_plan
 
+from mcj.runtime.recorders import DebugRecorderAdapter
 from mcj.runtime.session_context import SessionContext
 from mcj.runtime.events import SESSION_EVENTS, EventRecorder
 from mcj.runtime.environments import Environment
@@ -54,7 +55,7 @@ def build_session(session_info: SessionInfo, backend: RenderBackend):
         clock=clock,
         input=InputManager(input_adapters),
         input_backend=InputBackend(session_info.input_backend),
-        recorder=EventRecorder(),
+        recorder=EventRecorder(adapters=(DebugRecorderAdapter(),)),
     )
 
     # --- Configure trial environments ---

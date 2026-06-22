@@ -13,11 +13,13 @@ class ScriptEvent:
     type: Literal["button", "trigger"]
     code: str | int
     is_press: bool = True
+    time: float | None = None
 
 class ScriptedInputAdapter(InputAdapter):
     _clock: Clock
     _script: deque[ScriptEvent] 
     _event_buffer: list[ButtonEvent | TriggerEvent]
+    _start_time: float | None = None
 
     def __init__(
         self,

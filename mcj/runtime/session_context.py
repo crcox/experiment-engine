@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from typing import Mapping, TypeVar, Type
 
+from mcj.runtime.recorders import RecorderAdapter
 from mcj.runtime.time import Clock
 from mcj.runtime.input import InputManager, InputBackend
 from mcj.runtime.events import EventRecorder
@@ -24,6 +25,7 @@ class SessionContext:
     input: InputManager
     input_backend: InputBackend
     recorder: EventRecorder
+    recorder_adapters: tuple[RecorderAdapter, ...] = ()
 
     def now(self) -> float:
         return self.clock()
