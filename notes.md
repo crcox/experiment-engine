@@ -66,3 +66,19 @@ from mcj.tasks.criterion_judgment.timing import build_schedule
 from mcj.tasks.criterion_judgment.prompt import present_prompt
 from mcj.tasks.criterion_judgment.definition import present_definition
 from mcj.tasks.criterion_judgment.trial import run_trial
+
+- 2026-06-23 11:31:14 — while working in C:\Users\chriscox\GitHub\experiment-engine\mcj\runtime\scripting\keyboard_driver.py
+ Input layer principles:
+ * InputAdapters must emit all raw events
+ * Filtering happens only in ActionMapping
+
+ Exercise for the reader :):
+ * Map out my system. Which modules belong to:
+ 1. Input
+ 2. Runtime
+ 3. Tasks
+ 4. Events
+ 5. Scripting
+
+- 2026-06-24 05:58:36 — while working in C:\Users\chriscox\GitHub\experiment-engine\mcj\runtime\scripting\base_driver.py
+ Should ScriptDriver(ABC) be ScriptDriver(Protocol)? 

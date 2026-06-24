@@ -39,7 +39,7 @@ class ResponseMarkConfig:
 
 
 @dataclass(frozen=True)
-class RoleConfig(Generic[ActionT]):
+class TaskProfileConfig(Generic[ActionT]):
     termination_by_state: Mapping[State, TerminationCondition[ActionT]]
     action_mapping_by_state: ActionMappingByState[ActionT]
     prompt_duration_seconds: float | None

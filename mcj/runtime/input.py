@@ -8,7 +8,7 @@ from mcj.runtime.input_events import ButtonEvent, TriggerEvent
 class InputBackend(Enum):
     REAL = "real"
     SCRIPTED = "scripted"
-    MOCKED = "mocked"
+    SIMULATED = "simulated"
 
 class InputChannel(Enum):
     KEYBOARD = auto()

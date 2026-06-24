@@ -35,8 +35,8 @@ class CedrusAdapter(InputAdapter):
     - Only aligned events are emitted
     - Unaligned events are dropped (optionally logged in debug environment)
     """
+    device: XidDeviceLike
     _clock: Clock
-    _dev: XidDeviceLike
     _trigger_key: int
     _event_buffer: deque[TriggerEvent | ButtonEvent]
     _debug: bool
@@ -55,7 +55,7 @@ class CedrusAdapter(InputAdapter):
     ):
         # --- Device selection ---
         if device is not None:
-            self._dev = device
+            self.device = device
         else:
             from pyxid2.pyxid_impl import XidDevice
             attempt = 0
@@ -72,7 +72,7 @@ class CedrusAdapter(InputAdapter):
             if not devices:
                 raise RuntimeError("No Cedrus devices found")
 
-            self._dev = devices[device_index]
+            self.device = devices[device_index]
 
         # --- Core state ---
         self._clock = clock
@@ -99,10 +99,10 @@ class CedrusAdapter(InputAdapter):
         t_before = self._last_t_before
         self._last_t_before = None
 
-        self._dev.poll_for_response()
+        self.device.poll_for_response()
 
-        while self._dev.response_queue_size():
-            xid_event = pop_next_xid_event(self._dev)
+        while self.device.response_queue_size():
+            xid_event = pop_next_xid_event(self.device)
 
             if xid_event is not None:
                 stamped = stamp_event(xid_event, self._clock)
@@ -115,7 +115,7 @@ class CedrusAdapter(InputAdapter):
                 else:
                     self._handle_unaligned_event(stamped)
 
-            self._dev.poll_for_response()
+            self.device.poll_for_response()
 
 
     def pop_events(self) -> list[TriggerEvent | ButtonEvent]:
@@ -142,16 +142,16 @@ class CedrusAdapter(InputAdapter):
         Used before alignment to guarantee that no stale device events
         contaminate the new timebase.
         """
-        self._dev.poll_for_response()
+        self.device.poll_for_response()
 
-        while self._dev.response_queue_size():
-            xid_event = pop_next_xid_event(self._dev)
+        while self.device.response_queue_size():
+            xid_event = pop_next_xid_event(self.device)
 
             if xid_event is not None:
                 stamped = stamp_event(xid_event, self._clock)
                 self._handle_unaligned_event(stamped)
 
-            self._dev.poll_for_response()
+            self.device.poll_for_response()
 
         self._event_buffer.clear()
 
@@ -201,7 +201,7 @@ class CedrusAdapter(InputAdapter):
         """
         Reset Cedrus device timer (XID clock).
         """
-        self._dev.reset_timer()
+        self.device.reset_timer()
 
 
     # --- Private helpers ---

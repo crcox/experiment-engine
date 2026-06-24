@@ -2,7 +2,7 @@ from typing import Sequence
 
 from dataclasses import dataclass
 
-from mcj.runtime.profiles import RoleConfig
+from mcj.runtime.profiles import TaskProfileConfig
 from mcj.runtime.states import TrialState
 
 from mcj.tasks.criterion_judgment.actions import CJAction
@@ -64,7 +64,7 @@ def make_empty_schedule(n_trials: int) -> list[TrialTiming]:
         for _ in range(n_trials)
     ]
 
-def build_schedule(t0: float, n_trials: int, profile_cfg: RoleConfig[CJAction]) -> Sequence[TrialTiming]:
+def build_schedule(t0: float, n_trials: int, profile_cfg: TaskProfileConfig[CJAction]) -> Sequence[TrialTiming]:
     # The definition routine only happens in Practice environment, and is always ActionTermination()
     prompt_duration = profile_cfg.prompt_duration_seconds
     fixation_duration = profile_cfg.fixation_duration_seconds

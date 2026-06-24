@@ -3,7 +3,7 @@ from typing import Any, Sequence
 from dataclasses import dataclass
 
 from mcj.runtime.input import InputBackend
-from mcj.runtime.scripted import ScriptEvent
+from mcj.runtime.scripting.events import ScriptEvent
 from mcj.runtime.environments import Environment
 from mcj.runtime.profiles import TaskProfile
 from mcj.runtime.exceptions import SessionInfoError
@@ -15,6 +15,7 @@ class SessionInfo:
     task_profile: TaskProfile
     input_backend: InputBackend
     script: Sequence[ScriptEvent] | None
+    enable_triggers: bool = False
 
 class SessionInfoProvider(ABC):
 

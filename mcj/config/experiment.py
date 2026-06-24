@@ -3,7 +3,7 @@ from __future__ import annotations
 from mcj.runtime.environments import Environment
 from mcj.runtime.input import InputBackend, InputChannel, AdapterType
 from mcj.runtime.profiles import TaskProfile
-from mcj.runtime.config_types import RoleBundle
+from mcj.runtime.config_types import TaskProfileConfigs
 
 from mcj.routines.instructions.config import (
     build_instruction_profile_config,
@@ -39,7 +39,7 @@ CHANNEL_IMPLEMENTATIONS = {
 }
 
 
-CONFIG_BY_PROFILE: dict[TaskProfile, RoleBundle]  = {
+CONFIG_BY_PROFILE: dict[TaskProfile, TaskProfileConfigs]  = {
     TaskProfile.PRACTICE: {
         "instructions": build_instruction_profile_config(),
         "task": build_practice_profile_config(),

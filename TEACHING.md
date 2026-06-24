@@ -72,7 +72,7 @@ You write tasks. The framework handles everything else.
               ↓
  ┌─────────────────────────────┐
  │   ROLE CONFIG               │
- │  RoleConfig[ActionT]        │
+ │  TaskProfileConfig[ActionT]        │
  │   - mappings                │
  │   - termination             │
  └────────────┬────────────────┘
@@ -133,14 +133,14 @@ def build_action_mapping(session: SessionRuntime) -> ActionMapping[MyAction]:
 
 ---
 
-## Step 3. Create your RoleConfig
+## Step 3. Create your TaskProfileConfig
 
-RoleConfig defines how your task behaves.
+TaskProfileConfig defines how your task behaves.
 
 📁 `tasks/my_task/config.py`
 
 ```python
-from mcj.runtime.roles import RoleConfig
+from mcj.runtime.roles import TaskProfileConfig
 from mcj.runtime.mapping import key_mapping, dynamic_mapping
 from mcj.runtime.termination import ActionTermination, ActionOrTimeoutTermination
 
@@ -148,7 +148,7 @@ from mcj.tasks.my_task.actions import MyAction
 from mcj.tasks.my_task.mapping import build_action_mapping
 
 def build_task_config():
-    return RoleConfig[MyAction](
+    return TaskProfileConfig[MyAction](
         termination_by_state={
             # example
             "PROMPT": ActionTermination(),
@@ -208,7 +208,7 @@ CONFIG_BY_ROLE = {
   This is more complicated, but I think will do a lot to orient students to
   practical design patterns.
 
-* There is no mention of defining states, and the RoleConfig appears to be
+* There is no mention of defining states, and the TaskProfileConfig appears to be
   keyed with strings rather than enums. Again, this may be a useful
   simplification in a first-blush presentation... but it will be very confusing
   if a student takes it literally and jumps in to building.
@@ -326,12 +326,12 @@ def build_action_mapping(session: SessionRuntime) -> ActionMapping[MyAction]:
 
 ---
 
-## Step 4. Create your RoleConfig
+## Step 4. Create your TaskProfileConfig
 
-RoleConfig defines how your task behaves. Notice that behavior is defined for
+TaskProfileConfig defines how your task behaves. Notice that behavior is defined for
 each state. This means that behavior is state-dependent.
 
-Notice how enums are being used here. The RoleConfig needs to know about your
+Notice how enums are being used here. The TaskProfileConfig needs to know about your
 action vocabulary `MyAction`, and states are refering to `MyState` enum
 members. This has many consequences, but one is that your states are *your
 states*. Even if `FIXATION` is a state in every task, `MyState.FIXATION` is
@@ -342,7 +342,7 @@ a bespoke state space.
 📁 `tasks/my_task/config.py`
 
 ```python
-from mcj.runtime.roles import RoleConfig
+from mcj.runtime.roles import TaskProfileConfig
 from mcj.runtime.mapping import key_mapping, dynamic_mapping
 from mcj.runtime.termination import ActionTermination, ActionOrTimeoutTermination
 
@@ -351,7 +351,7 @@ from mcj.tasks.my_task.states import MyState
 from mcj.tasks.my_task.mapping import build_action_mapping
 
 def build_task_config():
-    return RoleConfig[MyAction](
+    return TaskProfileConfig[MyAction](
         termination_by_state={
             # example
             MyState.PROMPT: ActionTermination(),

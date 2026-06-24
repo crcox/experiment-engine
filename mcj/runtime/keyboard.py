@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from collections import deque
+from dataclasses import replace
 
 from mcj.runtime.time import Clock
 from mcj.runtime.input_events import ButtonEvent, ButtonDevice
@@ -20,14 +21,12 @@ class KeyboardAdapter(InputAdapter):
     Events are assumed to already be in system clock time.
     """
     _clock: Clock
-    _allowed_keys: set[str] | None
     _event_buffer: deque[ButtonEvent]
     _kb: KeyboardLike
     def __init__(
         self,
         *,
         clock: Clock,
-        allowed_keys: set[str] | None,
         kb: KeyboardLike | None=None,
     ):
         from psychopy.hardware.keyboard import Keyboard
@@ -37,7 +36,6 @@ class KeyboardAdapter(InputAdapter):
             self._kb = kb
 
         self._event_buffer: deque[ButtonEvent] = deque()
-        self._allowed_keys = allowed_keys
 
 
     @property
@@ -56,13 +54,6 @@ class KeyboardAdapter(InputAdapter):
             return
 
         for k in keys:
-            not_allowed = (
-                self._allowed_keys is not None
-                and k.name not in self._allowed_keys
-            )
-            if not_allowed:
-                continue
-
             self._event_buffer.append(ButtonEvent(
                 time=k.rt,
                 code=k.name,
@@ -90,3 +81,5 @@ class KeyboardAdapter(InputAdapter):
         self._kb.clearEvents()
         self._event_buffer.clear()
 
+    def inject_event(self, event: ButtonEvent) -> None:
+        self._event_buffer.append(event)

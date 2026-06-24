@@ -1,8 +1,8 @@
 from dataclasses import dataclass
 from pathlib import Path
 
-from mcj.runtime.config_types import RoleBundle
-from mcj.runtime.profiles import RoleConfig, FeedbackConfig, FeedbackStimulusConfig, ResponseMarkConfig
+from mcj.runtime.config_types import TaskProfileConfigs
+from mcj.runtime.profiles import TaskProfileConfig, FeedbackConfig, FeedbackStimulusConfig, ResponseMarkConfig
 from mcj.runtime.mapping import key_mapping, dynamic_mapping, no_op
 from mcj.runtime.states import TrialState, PromptState, DefinitionState
 from mcj.runtime.termination import TimeTermination, ActionTermination, ActionOrTimeoutTermination
@@ -15,11 +15,11 @@ from mcj.tasks.criterion_judgment.actions import CJAction
 class CriterionJudgmentTaskConfig:
     instructions_path: Path
 
-def get_task_config(bundle: RoleBundle) -> RoleConfig[CJAction]:
+def get_task_config(bundle: TaskProfileConfigs) -> TaskProfileConfig[CJAction]:
     return bundle["task"]
 
-def build_practice_profile_config() -> RoleConfig[CJAction]:
-    return RoleConfig(
+def build_practice_profile_config() -> TaskProfileConfig[CJAction]:
+    return TaskProfileConfig(
         termination_by_state={
             PromptState.PROMPT: ActionTermination({CJAction.ADVANCE}),
             DefinitionState.DEFINITION: ActionTermination({CJAction.ADVANCE}),
@@ -47,8 +47,8 @@ def build_practice_profile_config() -> RoleConfig[CJAction]:
     )
 
 
-def build_main_profile_config() -> RoleConfig[CJAction]:
-    return RoleConfig(
+def build_main_profile_config() -> TaskProfileConfig[CJAction]:
+    return TaskProfileConfig(
         termination_by_state={
             PromptState.PROMPT: TimeTermination(),
             TrialState.FIXATION: TimeTermination(),
@@ -69,8 +69,8 @@ def build_main_profile_config() -> RoleConfig[CJAction]:
     )
 
 
-def build_dev_profile_config() -> RoleConfig[CJAction]:
-    return RoleConfig(
+def build_dev_profile_config() -> TaskProfileConfig[CJAction]:
+    return TaskProfileConfig(
         termination_by_state={
             PromptState.PROMPT: ActionTermination({CJAction.ADVANCE}),
             DefinitionState.DEFINITION: ActionTermination({CJAction.ADVANCE}),

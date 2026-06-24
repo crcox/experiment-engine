@@ -3,7 +3,7 @@ from typing import Callable
 from mcj.runtime.execution import ExecutionContext
 from mcj.runtime.session import SessionContext
 from mcj.runtime.display_primitives import StimFactory
-from mcj.runtime.profiles import RoleConfig
+from mcj.runtime.profiles import TaskProfileConfig
 from mcj.runtime.states import TrialState
 from mcj.runtime.termination import DonePredicate
 from mcj.runtime.end_reasons import EndReason
@@ -80,7 +80,7 @@ def run_trial(
     feedback_display = FeedbackDisplay(factory)
 
     # --- Define how states transition ---
-    def get_next_state(state: TrialState, profile_cfg: RoleConfig[CJAction]) -> TrialState:
+    def get_next_state(state: TrialState, profile_cfg: TaskProfileConfig[CJAction]) -> TrialState:
         if state == TrialState.FIXATION:
             return TrialState.STIMULUS
 

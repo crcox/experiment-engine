@@ -5,7 +5,9 @@ from mcj.config.paths import paths
 
 from mcj.plans.criterion_judgment.loader import load_criterion_judgment_plan
 
+from mcj.runtime.config_types import TaskProfileConfigs
 from mcj.runtime.recorders import DebugRecorderAdapter
+from mcj.runtime.session import SessionRuntime
 from mcj.runtime.session_context import SessionContext
 from mcj.runtime.events import SESSION_EVENTS, EventRecorder
 from mcj.runtime.environments import Environment
@@ -18,7 +20,7 @@ from mcj.runtime.display_profile import (
 )
 
 from mcj.runtime.input import InputManager, InputBackend
-from mcj.runtime.input_config import resolve_input_adapters
+from mcj.runtime.input_config import resolve_input_adapters, resolve_script_drivers, get_mock_cedrus_device
 from mcj.runtime.session_info import SessionInfo
 
 from mcj.io.loggers import EventTypeLogger
@@ -29,7 +31,7 @@ from mcj.adapters.psychopy.display import PsychoPyStimFactory
 from mcj.adapters.fake.display import FakeFactory
 
 
-def build_session(session_info: SessionInfo, backend: RenderBackend):
+def build_session(session_info: SessionInfo, backend: RenderBackend) -> tuple[SessionRuntime, TaskProfileConfigs, EventTypeLogger]:
 
     profile = session_info.task_profile
 
@@ -37,11 +39,21 @@ def build_session(session_info: SessionInfo, backend: RenderBackend):
 
     clock = resolve_clock(backend)
 
-
     input_adapters = resolve_input_adapters(
         session_info,
         clock
     )
+
+    script_drivers = resolve_script_drivers(session_info, clock, input_adapters)
+
+    block_start_hooks: list[Callable] = []
+    block_end_hooks: list[Callable] = []
+
+    cedrus_device = get_mock_cedrus_device(input_adapters)
+
+    if cedrus_device and session_info.enable_triggers:
+        block_start_hooks.append(cedrus_device.start_auto_trigger)
+        block_end_hooks.append(cedrus_device.stop_auto_trigger)
 
     # --- Define Session Context ---
     ctx = SessionContext(
@@ -58,6 +70,15 @@ def build_session(session_info: SessionInfo, backend: RenderBackend):
         recorder=EventRecorder(adapters=(DebugRecorderAdapter(),)),
     )
 
+    # --- Define Session Runtime ---
+    session = SessionRuntime(
+        ctx=ctx,
+        environment=session_info.environment,
+        drivers=tuple(script_drivers),
+        on_block_start=tuple(block_start_hooks),
+        on_block_end=tuple(block_end_hooks),
+    )
+
     # --- Configure trial environments ---
     cfg = CONFIG_BY_PROFILE[profile]
 
@@ -67,7 +88,7 @@ def build_session(session_info: SessionInfo, backend: RenderBackend):
         SESSION_EVENTS
     )
 
-    return ctx, cfg, session_logger
+    return session, cfg, session_logger
 
 
 def resolve_display(session_info: SessionInfo, backend: RenderBackend, dev_environment: bool=False):

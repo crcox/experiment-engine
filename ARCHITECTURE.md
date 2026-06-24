@@ -47,7 +47,7 @@ Each layer may depend on layers below it, but never above.
         │ base layer                 │
         │ SessionRuntime             │
         │ SessionContext             │
-        │ RoleBundle                 │
+        │ TaskProfileConfigs                 │
         └──────────┬─────────────────┘
                    ↓
         ┌────────────────────────────┐
@@ -72,7 +72,7 @@ Each layer may depend on layers below it, but never above.
 **Key Types:**
 - `SessionContext` — raw runtime environment (clock, input, events, etc.)
 - `SessionRuntime` — wrapper containing session-level properties (e.g., mode)
-- `RoleBundle` — typed grouping of role configs
+- `TaskProfileConfigs` — typed grouping of role configs
 
 ✅ Must not depend on:
 - mapping
@@ -96,7 +96,7 @@ Each layer may depend on layers below it, but never above.
 **Key Concepts:**
 - `EventMapping[ActionT]` — event → action
 - `TerminationCondition[ActionT]` — when a state ends
-- `RoleConfig[ActionT]` — per-state behavior definitions
+- `TaskProfileConfig[ActionT]` — per-state behavior definitions
 
 ✅ Depends on:
 - Base layer
@@ -119,7 +119,7 @@ Each layer may depend on layers below it, but never above.
 **Key Types:**
 - `ExecutionContext[ActionT]`
 
-> ExecutionContext = SessionRuntime + RoleConfig[ActionT]
+> ExecutionContext = SessionRuntime + TaskProfileConfig[ActionT]
 
 This is the only place where:
 - session data and
@@ -167,7 +167,7 @@ are combined.
 - task-specific config modules
 
 **Responsibilities:**
-- Assemble RoleConfigs
+- Assemble TaskProfileConfigs
 - Define experiment structure
 - Connect tasks and routines
 
@@ -204,7 +204,7 @@ SessionRuntime
 ↓
 ExecutionContext[ActionT]
 ↓
-RoleConfig[ActionT]
+TaskProfileConfig[ActionT]
 ↓
 Mapping / Termination
 ↓
@@ -224,7 +224,7 @@ Each routine defines its own **Action type**.
 
 Each Action type corresponds to its own:
 
-- `RoleConfig[ActionT]`
+- `TaskProfileConfig[ActionT]`
 - `ExecutionContext[ActionT]`
 - mapping + termination behavior
 
@@ -272,7 +272,7 @@ not on `ExecutionContext`.
 
 ❌ Importing config from tasks  
 ❌ Putting shared types in high-level modules  
-❌ Mixing Action types in one RoleConfig  
+❌ Mixing Action types in one TaskProfileConfig  
 ❌ Using `Any` to bypass generics  
 ❌ Creating bidirectional module dependencies  
 
