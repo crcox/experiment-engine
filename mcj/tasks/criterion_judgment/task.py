@@ -47,7 +47,7 @@ def run(
         
         for block_index in range(plan.nblocks):
             if session.environment == Environment.SCANNER:
-                alignment = sync_cedrus_and_experiment_clocks(session.ctx)
+                alignment = sync_cedrus_and_experiment_clocks(session)
                 t0 = alignment.t0_system_s
             else:
                 t0 = session.ctx.now()

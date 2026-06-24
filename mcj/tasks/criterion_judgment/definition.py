@@ -71,6 +71,7 @@ def present_definition(
     last_action: CJAction | None = None
     try:
         while True:
+            session.maybe_step_simulation()
             ctx.input.update()
 
             events = ctx.input.pop_events()

@@ -16,7 +16,7 @@ CODE_TO_SIDE_BY_ENVIRONMENT = {
         '0': ResponseSide.LEFT,
         '2': ResponseSide.RIGHT,
     },
-    Environment.PRACTICE: {
+    Environment.LOCAL: {
         'f': ResponseSide.LEFT,
         'j': ResponseSide.RIGHT,
     }

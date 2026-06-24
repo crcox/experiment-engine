@@ -67,6 +67,7 @@ def present_prompt(
 
     try:
         while True:
+            session.maybe_step_simulation()
             ctx.input.update()
 
             events = ctx.input.pop_events()

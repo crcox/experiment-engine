@@ -1,4 +1,5 @@
-from mcj.runtime.scripted import ScriptBuilder, respond_left, fixation, feedback, respond_left_cedrus, sequence
+from mcj.runtime.scripting.builder import ScriptBuilder
+from mcj.runtime.scripting.primitives import respond_left, fixation, feedback, respond_left_cedrus, sequence
 
 
 def test_practice_script():

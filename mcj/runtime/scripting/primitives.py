@@ -24,3 +24,10 @@ def respond_right_cedrus(s: ScriptBuilder):
 def send_scanner_trigger(s: ScriptBuilder):
     return s.trigger(4)
 
+def sequence(*fns: Callable[[ScriptBuilder], ScriptBuilder]):
+    def apply(s: ScriptBuilder) -> ScriptBuilder:
+        for fn in fns:
+            fn(s)
+        return s
+    return apply
+

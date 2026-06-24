@@ -12,7 +12,6 @@ from mcj.config.experiment import EXPERIMENT_NAME
 # --- Runtime core ---
 from mcj.runtime.backend import RenderBackend
 from mcj.runtime.execution import ExecutionContext
-from mcj.runtime.session import SessionRuntime
 from mcj.runtime.exceptions import ExperimentAbort
 from mcj.runtime.emitters import (
     emit_session_start,
@@ -46,14 +45,14 @@ DEV_ENVIRONMENT = True
 RENDER_BACKEND = RenderBackend.FAKE
 
 if DEV_ENVIRONMENT or RENDER_BACKEND == RenderBackend.FAKE:
-    from mcj.dev.scripts import test_scanner_script
+    from mcj.dev.scripts import test_practice_script
 
     provider = StaticSessionInfoProvider({
         "subject_id": 999,
-        "environment": "scanner",
+        "environment": "local",
         "profile": "dev",
         "input_backend": "scripted",
-        "script": test_scanner_script()
+        "script": test_practice_script()
     })
 else:
     provider = PsychoPyDialogProvider()
@@ -68,7 +67,7 @@ def run():
         subject_id=session_info.subject_id,
     )
 
-    ctx, profile_bundle, session_logger = build_session(session_info, backend=RENDER_BACKEND)
+    session, profile_bundle, session_logger = build_session(session_info, backend=RENDER_BACKEND)
 
     factory, display = resolve_display(session_info, backend=RENDER_BACKEND, dev_environment=DEV_ENVIRONMENT)
 
@@ -77,7 +76,7 @@ def run():
     with open(paths.DATA / "session.json", 'w', encoding='utf-8') as f: 
         json.dump({
             "type": "session_start",
-            "time": ctx.now(),
+            "time": session.ctx.now(),
             "subject_id": session_info.subject_id,
             "profile": session_info.task_profile.value,
             "environment": session_info.environment.value,
@@ -88,9 +87,9 @@ def run():
         }, f)
 
     # --- Start Session ---
-    emit_session_start(ctx)
-    emit_environment_set(ctx, session_info.environment)
-    emit_profile_set(ctx, session_info.task_profile)
+    emit_session_start(session.ctx)
+    emit_environment_set(session.ctx, session_info.environment)
+    emit_profile_set(session.ctx, session_info.task_profile)
 
     end_reason = EndReason.COMPLETE
     end_cause = None
@@ -101,12 +100,12 @@ def run():
     try:
         # --- Bundle runtime context and configuration ---
         instruction_ctx = ExecutionContext[InstructionAction](
-            session=SessionRuntime(ctx=ctx, environment=session_info.environment),
+            session=session,
             profile_cfg=profile_bundle["instructions"],
         )
 
         task_ctx = ExecutionContext[CJAction](
-            session=SessionRuntime(ctx=ctx, environment=session_info.environment),
+            session=session,
             profile_cfg=profile_bundle["task"],
         )
 
@@ -136,8 +135,8 @@ def run():
         raise
 
     finally:
-        emit_session_end(ctx, reason=end_reason, cause=end_cause)
-        session_logger.write_new(ctx.recorder)
+        emit_session_end(session.ctx, reason=end_reason, cause=end_cause)
+        session_logger.write_new(session.ctx.recorder)
         factory.close()
 
 

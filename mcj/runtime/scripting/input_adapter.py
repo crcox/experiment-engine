@@ -14,8 +14,10 @@ class ScriptedInputAdapter(InputAdapter):
     def __init__(
         self,
         clock: Clock,
+        scheduler: ScriptScheduler
     ):
         self._clock = clock
+        self._scheduler = scheduler
         self._event_buffer = []
 
     @property

@@ -1,7 +1,7 @@
 from enum import Enum
 
 class Environment(str, Enum):
-    PRACTICE = "practice"
+    LOCAL = "local"
     SCANNER = "scanner"
 
     @property

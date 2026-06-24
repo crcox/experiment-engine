@@ -1,4 +1,4 @@
-from typing import Callable
+from typing import Callable, Literal
 
 from mcj.runtime.scripting.events import ScriptEvent
 
@@ -25,12 +25,12 @@ class ScriptBuilder:
     def after(self, dt: float) -> "ScriptBuilder":
         return self.wait(dt)
 
-    def press(self, key: str) -> "ScriptBuilder":
-        self._append(type="button", code=key, is_press=True)
+    def press(self, key: str, target: Literal["keyboard", "cedrus"] | None = None) -> "ScriptBuilder":
+        self._append(target=target, type="button", code=key, is_press=True)
         return self
 
-    def trigger(self, code: int = 4) -> "ScriptBuilder":
-        self._append(type="trigger", code=str(code), is_press=True)
+    def trigger(self, code: int = 4, target: Literal["keyboard", "cedrus"] | None = None) -> "ScriptBuilder":
+        self._append(target=target, type="trigger", code=str(code), is_press=True)
         return self
 
     def repeat(self, n: int, fn: Callable[["ScriptBuilder"], "ScriptBuilder"]) -> "ScriptBuilder":
@@ -45,22 +45,16 @@ class ScriptBuilder:
     def build(self) -> list[ScriptEvent]:
         return list(self._events)
 
-    def _append(self, type, code, is_press=True):
+    def _append(self, type: Literal["button", "trigger"], code: str, is_press: bool, target: Literal["keyboard", "cedrus"] | None):
         self._events.append(
             ScriptEvent(
                 time=self._t,
                 type=type,
                 code=code,
                 is_press=is_press,
+                target=target,
             )
         )
 
-
-def sequence(*fns: Callable[[ScriptBuilder], ScriptBuilder]):
-    def apply(s: ScriptBuilder) -> ScriptBuilder:
-        for fn in fns:
-            fn(s)
-        return s
-    return apply
 
 

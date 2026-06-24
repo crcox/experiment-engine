@@ -18,7 +18,7 @@ from mcj.tasks.criterion_judgment.config import (
 EXPERIMENT_NAME: str = "Multi-Criterion Judgment Task"
 
 ENVIRONMENT_CHANNELS = {
-    Environment.PRACTICE: [
+    Environment.LOCAL: [
         InputChannel.KEYBOARD
     ],
     Environment.SCANNER: [
@@ -30,11 +30,11 @@ ENVIRONMENT_CHANNELS = {
 CHANNEL_IMPLEMENTATIONS = {
     InputChannel.KEYBOARD: {
         InputBackend.REAL: AdapterType.KEYBOARD,
-        InputBackend.MOCKED: AdapterType.KEYBOARD,
+        InputBackend.SIMULATED: AdapterType.KEYBOARD,
     },
     InputChannel.CEDRUS: {
         InputBackend.REAL: AdapterType.CEDRUS,
-        InputBackend.MOCKED: AdapterType.CEDRUS_MOCK,
+        InputBackend.SIMULATED: AdapterType.CEDRUS_MOCK,
     },
 }
 

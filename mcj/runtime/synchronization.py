@@ -3,10 +3,10 @@ import time
 from dataclasses import dataclass
 
 from mcj.runtime.time import Clock
-from mcj.runtime.session_context import SessionContext
+from mcj.runtime.session import SessionRuntime
 from mcj.runtime.emitters import emit_alignment_start, emit_alignment_end
 from mcj.runtime.end_reasons import EndReason
-from mcj.runtime.exceptions import ExperimentAbort, EscapePressed
+from mcj.runtime.exceptions import ExperimentAbort, EscapePressed, CedrusAlignmentTimout
 from mcj.runtime.input_events import ButtonEvent
 from mcj.runtime.input import InputBackend
 from mcj.runtime.cedrus import CedrusAdapter, Alignment
@@ -15,7 +15,9 @@ from mcj.runtime.cedrus import CedrusAdapter, Alignment
 class SimpleAlignment:
     t0_system: float
 
-def sync_cedrus_and_experiment_clocks(ctx: SessionContext) -> Alignment:
+def sync_cedrus_and_experiment_clocks(session: SessionRuntime) -> Alignment:
+    ctx = session.ctx
+
     if ctx.input_backend == InputBackend.SCRIPTED:
         t = ctx.now()
         return Alignment(
@@ -37,10 +39,15 @@ def sync_cedrus_and_experiment_clocks(ctx: SessionContext) -> Alignment:
         # --- Clear alignment data from the adapter ---
         cedrus_adapter.reset_alignment()
 
+        start = ctx.now()
         while not cedrus_adapter.is_aligned:
+            if ctx.now() - start > 5.0:
+                raise CedrusAlignmentTimout
+
             t_before = ctx.now()
             cedrus_adapter.set_last_t_before(t_before)
 
+            session.maybe_step_simulation()
             ctx.input.update()
 
             for event in ctx.input.peek_events():

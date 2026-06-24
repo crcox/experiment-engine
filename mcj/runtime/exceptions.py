@@ -23,6 +23,15 @@ class EscapePressed(ExperimentAbort):
             message="Experiment aborted (escape key pressed)"
         )
 
+class CedrusAlignmentTimout(ExperimentAbort):
+    """Raised when the user presses Escape to abort the session."""
+    def __init__(self):
+        super().__init__(
+            reason=EndReason.TIMEOUT,
+            cause="cedrus_alignment",
+            message="Cedrus alignment timed out"
+        )
+
 class CancelPressed(ExperimentAbort):
     """Raised when the user presses Cancel in dialog box to abort the session."""
     def __init__(self):

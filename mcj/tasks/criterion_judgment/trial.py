@@ -173,6 +173,7 @@ def run_trial(
         while state != TrialState.DONE:
 
             # --- update input ---
+            session.maybe_step_simulation()
             ctx.input.update()
 
             # --- process mechanical events ---

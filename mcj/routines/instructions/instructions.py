@@ -44,6 +44,7 @@ def present_instructions(
             slide = slides[index]
             emit_slide_start(ctx)
 
+            session.maybe_step_simulation()
             ctx.input.update()
             display.update(slide)
 

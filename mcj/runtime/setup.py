@@ -23,6 +23,8 @@ from mcj.runtime.input import InputManager, InputBackend
 from mcj.runtime.input_config import resolve_input_adapters, resolve_script_drivers, get_mock_cedrus_device
 from mcj.runtime.session_info import SessionInfo
 
+from mcj.runtime.scripting.scheduler import ScriptScheduler
+
 from mcj.io.loggers import EventTypeLogger
 
 from mcj.stimuli.loader import load_word_metadata_csv
@@ -31,12 +33,13 @@ from mcj.adapters.psychopy.display import PsychoPyStimFactory
 from mcj.adapters.fake.display import FakeFactory
 
 
-def build_session(session_info: SessionInfo, backend: RenderBackend) -> tuple[SessionRuntime, TaskProfileConfigs, EventTypeLogger]:
+def build_session(
+    session_info: SessionInfo,
+    backend: RenderBackend
+) -> tuple[SessionRuntime, TaskProfileConfigs, EventTypeLogger]:
 
     profile = session_info.task_profile
-
     word_table = load_word_metadata_csv()
-
     clock = resolve_clock(backend)
 
     input_adapters = resolve_input_adapters(
@@ -55,6 +58,11 @@ def build_session(session_info: SessionInfo, backend: RenderBackend) -> tuple[Se
         block_start_hooks.append(cedrus_device.start_auto_trigger)
         block_end_hooks.append(cedrus_device.stop_auto_trigger)
 
+    # --- Define Scheduler (for SCRIPTED and SIMULATED environments/backends) ---
+    scheduler = None
+    if session_info.script is not None:
+        scheduler = ScriptScheduler(clock=clock, script=session_info.script)
+ 
     # --- Define Session Context ---
     ctx = SessionContext(
         _plans={
@@ -74,6 +82,7 @@ def build_session(session_info: SessionInfo, backend: RenderBackend) -> tuple[Se
     session = SessionRuntime(
         ctx=ctx,
         environment=session_info.environment,
+        scheduler=scheduler,
         drivers=tuple(script_drivers),
         on_block_start=tuple(block_start_hooks),
         on_block_end=tuple(block_end_hooks),
@@ -93,7 +102,7 @@ def build_session(session_info: SessionInfo, backend: RenderBackend) -> tuple[Se
 
 def resolve_display(session_info: SessionInfo, backend: RenderBackend, dev_environment: bool=False):
     if backend == RenderBackend.PSYCHOPY:
-        if session_info.environment == Environment.PRACTICE:
+        if session_info.environment == Environment.LOCAL:
             display = LAPTOP_DISPLAY
         elif session_info.environment == Environment.SCANNER:
             if dev_environment:
