@@ -1,4 +1,4 @@
-from mcj.runtime.input import InputBackend, AdapterType, InputAdapter
+from mcj.runtime.input import InputMode, AdapterType, InputAdapter, InputChannel
 from mcj.runtime.input_types import AdapterFactory
 from mcj.runtime.keyboard import KeyboardAdapter
 from mcj.runtime.cedrus import CedrusAdapter
@@ -10,15 +10,15 @@ from mcj.runtime.time import Clock
 from mcj.runtime.scripting.cedrus_driver import CedrusScriptDriver
 from mcj.runtime.scripting.keyboard_driver import KeyboardScriptDriver
 
-from mcj.config.experiment import ENVIRONMENT_CHANNELS, CHANNEL_IMPLEMENTATIONS
+from mcj.config.experiment import ENVIRONMENT_CHANNELS
 
 from mcj.adapters.pyxid2.mock import MockXidDevice
 
 def resolve_input_adapters(session_info: SessionInfo, clock: Clock) -> list[InputAdapter]:
-    input_backend = session_info.input_backend
+    input_mode = session_info.input_mode
 
     # --- global override (event-level simulation)
-    if input_backend == InputBackend.SCRIPTED:
+    if input_mode == InputMode.SIMULATED and simulation_mode == SimulationMode.SCRIPTED:
         return [
             ADAPTER_FACTORIES[AdapterType.SCRIPTED](clock, session_info)
         ]
@@ -28,11 +28,11 @@ def resolve_input_adapters(session_info: SessionInfo, clock: Clock) -> list[Inpu
 
     adapters = []
     for channel in channels:
-        if input_backend not in CHANNEL_IMPLEMENTATIONS[channel]:
+        if input_mode not in CHANNEL_IMPLEMENTATIONS[channel]:
             raise RuntimeError(
-                f"No implementation defined for channel={channel} with backend={input_backend}"
+                f"No implementation defined for channel={channel} with backend={input_mode}"
             )
-        impl_key = CHANNEL_IMPLEMENTATIONS[channel][input_backend]
+        impl_key = CHANNEL_IMPLEMENTATIONS[channel][input_mode]
         factory = ADAPTER_FACTORIES[impl_key]
         adapters.append(factory(clock, session_info))
 
@@ -105,10 +105,10 @@ def build_scripted(clock: Clock, session_info: SessionInfo):
         )
     )
 
-ADAPTER_FACTORIES: dict[AdapterType, AdapterFactory] = {
-    AdapterType.KEYBOARD: build_keyboard,
-    AdapterType.CEDRUS: build_cedrus,
-    AdapterType.CEDRUS_MOCK: build_cedrus_mock,
-    AdapterType.SCRIPTED: build_scripted,
+ADAPTER_FACTORIES: dict[tuple[InputChannel, InputMode], AdapterFactory] = {
+    (InputChannel.KEYBOARD, InputMode.REAL): build_keyboard,
+    (InputChannel.CEDRUS, InputMode.REAL): build_cedrus,
+    (InputChannel.KEYBOARD, InputMode.SIMULATED): build_keyboard,
+    (InputChannel.CEDRUS, InputMode.SIMULATED): build_cedrus_mock,
 }
 

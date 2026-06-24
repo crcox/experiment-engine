@@ -5,7 +5,7 @@ from typing import Sequence, Type, TypeVar
 
 from mcj.runtime.input_events import ButtonEvent, TriggerEvent
 
-class InputBackend(Enum):
+class InputMode(Enum):
     REAL = "real"
     SCRIPTED = "scripted"
     SIMULATED = "simulated"

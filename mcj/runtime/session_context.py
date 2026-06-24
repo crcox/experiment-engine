@@ -3,7 +3,7 @@ from typing import Mapping, TypeVar, Type
 
 from mcj.runtime.recorders import RecorderAdapter
 from mcj.runtime.time import Clock
-from mcj.runtime.input import InputManager, InputBackend
+from mcj.runtime.input import InputManager, InputMode
 from mcj.runtime.events import EventRecorder
 from mcj.plans.common import TaskPlan
 
@@ -23,7 +23,7 @@ class SessionContext:
     _plans: Mapping[str, TaskPlan]
     clock: Clock
     input: InputManager
-    input_backend: InputBackend
+    input_mode: InputMode
     recorder: EventRecorder
     recorder_adapters: tuple[RecorderAdapter, ...] = ()
 

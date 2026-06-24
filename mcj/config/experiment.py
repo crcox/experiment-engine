@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from mcj.runtime.environments import Environment
-from mcj.runtime.input import InputBackend, InputChannel, AdapterType
+from mcj.runtime.input import InputMode, InputChannel, AdapterType
 from mcj.runtime.profiles import TaskProfile
 from mcj.runtime.config_types import TaskProfileConfigs
 
@@ -26,18 +26,6 @@ ENVIRONMENT_CHANNELS = {
         InputChannel.CEDRUS,
     ],
 }
-
-CHANNEL_IMPLEMENTATIONS = {
-    InputChannel.KEYBOARD: {
-        InputBackend.REAL: AdapterType.KEYBOARD,
-        InputBackend.SIMULATED: AdapterType.KEYBOARD,
-    },
-    InputChannel.CEDRUS: {
-        InputBackend.REAL: AdapterType.CEDRUS,
-        InputBackend.SIMULATED: AdapterType.CEDRUS_MOCK,
-    },
-}
-
 
 CONFIG_BY_PROFILE: dict[TaskProfile, TaskProfileConfigs]  = {
     TaskProfile.PRACTICE: {

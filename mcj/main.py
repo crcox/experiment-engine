@@ -51,7 +51,7 @@ if DEV_ENVIRONMENT or RENDER_BACKEND == RenderBackend.FAKE:
         "subject_id": 999,
         "environment": "local",
         "profile": "dev",
-        "input_backend": "simulated",
+        "input_mode": "simulated",
         "script": test_practice_script()
     })
 else:
@@ -80,7 +80,7 @@ def run():
             "subject_id": session_info.subject_id,
             "profile": session_info.task_profile.value,
             "environment": session_info.environment.value,
-            "input_backend": session_info.input_backend.value,
+            "input_mode": session_info.input_mode.value,
             "display": display.to_dict(),
             "psychopy_version": factory.version(),
             "python_version": python_version()

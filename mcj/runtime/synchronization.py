@@ -8,7 +8,7 @@ from mcj.runtime.emitters import emit_alignment_start, emit_alignment_end
 from mcj.runtime.end_reasons import EndReason
 from mcj.runtime.exceptions import ExperimentAbort, EscapePressed, CedrusAlignmentTimout
 from mcj.runtime.input_events import ButtonEvent
-from mcj.runtime.input import InputBackend
+from mcj.runtime.input import InputMode
 from mcj.runtime.cedrus import CedrusAdapter, Alignment
 
 @dataclass(frozen=True)
@@ -18,7 +18,7 @@ class SimpleAlignment:
 def sync_cedrus_and_experiment_clocks(session: SessionRuntime) -> Alignment:
     ctx = session.ctx
 
-    if ctx.input_backend == InputBackend.SCRIPTED:
+    if ctx.input_mode == InputMode.SCRIPTED:
         t = ctx.now()
         return Alignment(
             t0_system_s=t,

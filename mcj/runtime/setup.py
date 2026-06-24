@@ -19,7 +19,7 @@ from mcj.runtime.display_profile import (
     NULL_DISPLAY,
 )
 
-from mcj.runtime.input import InputManager, InputBackend
+from mcj.runtime.input import InputManager, InputMode
 from mcj.runtime.input_config import resolve_input_adapters, resolve_script_drivers, get_mock_cedrus_device
 from mcj.runtime.session_info import SessionInfo
 
@@ -74,7 +74,7 @@ def build_session(
         },
         clock=clock,
         input=InputManager(input_adapters),
-        input_backend=InputBackend(session_info.input_backend),
+        input_mode=InputMode(session_info.input_mode),
         recorder=EventRecorder(adapters=(DebugRecorderAdapter(),)),
     )
 

@@ -37,7 +37,7 @@ def test_simulation_backend(with_time: bool=False):
         "subject_id": 999,
         "environment": "local",
         "profile": "dev",
-        "input_backend": "simulated",
+        "input_mode": "simulated",
         "script": script["with_time"] if with_time else script["without_time"],
     })
 
@@ -79,7 +79,7 @@ def test_alignment():
         "subject_id": 999,
         "environment": "scanner",
         "profile": "dev",
-        "input_backend": "simulated",
+        "input_mode": "simulated",
         "script": script["trigger_alignment"],
     })
 
