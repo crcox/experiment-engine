@@ -38,5 +38,8 @@ class KeyboardScriptDriver:
 
             self._adapter.inject_event(event)
 
+        elif ev.type == "trigger":
+            pass
+
         else:
             raise RuntimeError(f"Unhandled ScriptEvent.type={ev.type!r}")
