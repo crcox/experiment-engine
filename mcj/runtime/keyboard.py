@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from collections import deque
-from dataclasses import replace
 
 from mcj.runtime.time import Clock
 from mcj.runtime.input_events import ButtonEvent, ButtonDevice
@@ -9,6 +8,20 @@ from mcj.runtime.input import InputAdapter, AdapterType
 
 from mcj.adapters.psychopy.api import get_keypresses
 from mcj.adapters.psychopy.protocols import KeyboardLike
+
+class PsychopyClockAdapter:
+    def __init__(self, clock: Clock) -> None:
+        self._clock = clock
+
+    def getTime(self) -> float:
+        return self._clock()
+
+    def getLastResetTime(self) -> float:
+        return 0.0
+
+    def reset(self) -> None:
+        # optional: no-op unless you want to support it
+        pass
 
 
 class KeyboardAdapter(InputAdapter):
@@ -31,7 +44,7 @@ class KeyboardAdapter(InputAdapter):
     ):
         from psychopy.hardware.keyboard import Keyboard
         if kb is None:
-            self._kb = Keyboard(clock=clock)
+            self._kb = Keyboard(clock=PsychopyClockAdapter(clock))
         else:
             self._kb = kb
 
