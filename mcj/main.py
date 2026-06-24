@@ -51,7 +51,7 @@ if DEV_ENVIRONMENT or RENDER_BACKEND == RenderBackend.FAKE:
         "subject_id": 999,
         "environment": "local",
         "profile": "dev",
-        "input_backend": "scripted",
+        "input_backend": "simulated",
         "script": test_practice_script()
     })
 else:
