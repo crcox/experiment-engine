@@ -17,7 +17,6 @@ from mcj.adapters.pyxid2.mock import MockXidDevice
 def resolve_input_adapters(session_info: SessionInfo, clock: Clock) -> list[InputAdapter]:
     input_backend = session_info.input_backend
 
-
     # --- global override (event-level simulation)
     if input_backend == InputBackend.SCRIPTED:
         return [
