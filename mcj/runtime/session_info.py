@@ -54,13 +54,19 @@ def parse_session_info(raw: dict[str, Any]) -> SessionInfo:
     except ValueError as e:
         raise SessionInfoError(f"{input_backend_str!r} does not correspond to a valid input environment") from e
 
+    INPUT_BACKEND_CAPABILITIES = {
+        InputBackend.SCRIPTED: {"reads_script": True, },
+        InputBackend.SIMULATED: {"reads_script": True, },
+        InputBackend.REAL: {"reads_script": False, },
+    }
+    capabilities = INPUT_BACKEND_CAPABILITIES[input_backend]
+
     script = raw.get("script")
-    if input_backend == InputBackend.SCRIPTED:
-        if script is None:
-            raise SessionInfoError(f"input_backend=={InputBackend.SCRIPTED}, but no 'script' was provided. This is a misconfiguration.")
-    else:
-        if script is not None:
-            raise SessionInfoError(f"input_backend!={InputBackend.SCRIPTED}, but a 'script' was provided. This is a misconfiguration.")
+    if capabilities["reads_script"] and script is None:
+        raise SessionInfoError(f"The input_backend {input_backend} requires a script")
+
+    if script is not None and not capabilities["reads_script"]:
+        raise SessionInfoError(f"The input_backend {input_backend} does not support scripts")
 
     if script is not None:
         if not isinstance(script, Sequence):
@@ -74,5 +80,5 @@ def parse_session_info(raw: dict[str, Any]) -> SessionInfo:
         environment=environment,
         task_profile=profile,
         input_backend=input_backend,
-        script=script
+        script=script,
     )
