@@ -5,7 +5,7 @@ from collections import deque
 
 from mcj.adapters.pyxid2.api import get_xid_devices, pop_next_xid_event, XidDeviceLike
 from mcj.adapters.pyxid2.types import XidEvent, Stamped, stamp_event
-from mcj.runtime.input import InputAdapter, AdapterType
+from mcj.runtime.input import InputAdapter
 from mcj.runtime.input_events import ButtonEvent, TriggerEvent, ButtonDevice
 from mcj.runtime.time import Clock
 
@@ -83,11 +83,6 @@ class CedrusAdapter(InputAdapter):
         self._event_buffer: deque[TriggerEvent | ButtonEvent] = deque()
 
         self._debug = debug
-
-
-    @property
-    def adapter_type(self) -> AdapterType:
-        return AdapterType.CEDRUS
 
 
     # --- Public API ---

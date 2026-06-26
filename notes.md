@@ -82,3 +82,6 @@ from mcj.tasks.criterion_judgment.trial import run_trial
 
 - 2026-06-24 05:58:36 — while working in C:\Users\chriscox\GitHub\experiment-engine\mcj\runtime\scripting\base_driver.py
  Should ScriptDriver(ABC) be ScriptDriver(Protocol)? 
+
+- 2026-06-24 19:02:55 — while working in c:\Users\chriscox\GitHub\experiment-engine\mcj\config\experiment.py
+ I started to add RunMode, but that was premature. I should consolidate on TaskProfiles. Everything related to RunMode should be removed. 

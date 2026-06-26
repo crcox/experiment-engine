@@ -7,25 +7,22 @@ from mcj.runtime.input_events import ButtonEvent, TriggerEvent
 
 class InputMode(Enum):
     REAL = "real"
-    SCRIPTED = "scripted"
-    SIMULATED = "simulated"
+    SIMULATED_DIRECT = "simulated_direct"
+    SIMULATED_DEVICE = "simulated_device"
+
+    @property
+    def requires_script(self) -> bool:
+        return self in {
+            InputMode.SIMULATED_DIRECT,
+            InputMode.SIMULATED_DEVICE,
+        }
+
 
 class InputChannel(Enum):
     KEYBOARD = auto()
     CEDRUS = auto()
 
-class AdapterType(Enum):
-    CEDRUS=auto()
-    CEDRUS_MOCK=auto()
-    KEYBOARD=auto()
-    SCRIPTED=auto()
-
 class InputAdapter(ABC):
-
-    @property
-    @abstractmethod
-    def adapter_type(self) -> AdapterType:
-        raise NotImplementedError
 
     @abstractmethod
     def update(self) -> None:

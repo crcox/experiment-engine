@@ -1,6 +1,6 @@
 from pathlib import Path
 from mcj.config.paths import paths
-from mcj.xid.mock import MockXidDevice
+from mcj.adapters.pyxid2.mock import MockXidDevice
 from mcj.runtime.cedrus import CedrusAdapter
 import time
 
@@ -8,7 +8,6 @@ import time
 def main():
     paths.initialize(
         root=Path.cwd(),
-        subject_id=1000
     )
     paths.add_ftd2xx_dll_directory()
 

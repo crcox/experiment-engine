@@ -1,3 +1,4 @@
+**/*.pyc
 .nvim.lua
 .venv/
 trash/

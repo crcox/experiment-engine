@@ -1,16 +1,16 @@
 from __future__ import annotations
 
 from mcj.runtime.environments import Environment
-from mcj.runtime.input import InputMode, InputChannel, AdapterType
-from mcj.runtime.profiles import TaskProfile
-from mcj.runtime.config_types import TaskProfileConfigs
+from mcj.runtime.input import InputChannel
+from mcj.runtime.profiles import ExperimentProfile
+from mcj.runtime.config_types import TaskConfigBundle
 
 from mcj.routines.instructions.config import (
     build_instruction_profile_config,
 )
 from mcj.tasks.criterion_judgment.config import (
     build_practice_profile_config,
-    build_main_profile_config,
+    build_experiment_profile_config,
     build_dev_profile_config,
 )
 
@@ -27,16 +27,16 @@ ENVIRONMENT_CHANNELS = {
     ],
 }
 
-CONFIG_BY_PROFILE: dict[TaskProfile, TaskProfileConfigs]  = {
-    TaskProfile.PRACTICE: {
+CONFIG_BY_PROFILE: dict[ExperimentProfile, TaskConfigBundle]  = {
+    ExperimentProfile.PRACTICE: {
         "instructions": build_instruction_profile_config(),
         "task": build_practice_profile_config(),
     },
-    TaskProfile.MAIN: {
+    ExperimentProfile.EXPERIMENT: {
         "instructions": build_instruction_profile_config(),
-        "task": build_main_profile_config(),
+        "task": build_experiment_profile_config(),
     },
-    TaskProfile.DEV: {
+    ExperimentProfile.DEV: {
         "instructions": build_instruction_profile_config(),
         "task": build_dev_profile_config(),
     },

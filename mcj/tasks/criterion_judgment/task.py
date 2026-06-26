@@ -14,7 +14,6 @@ from mcj.runtime.display_primitives import StimFactory
 from mcj.routines.instructions.instructions import present_instructions
 
 from mcj.tasks.criterion_judgment.actions import CJAction
-from mcj.tasks.criterion_judgment.config import CriterionJudgmentTaskConfig
 from mcj.tasks.criterion_judgment.emitters import emit_task_start, emit_task_end
 
 from mcj.tasks.criterion_judgment.block import run_block
@@ -24,7 +23,6 @@ def run(
     factory: StimFactory,
     instruction_ctx: ExecutionContext[InstructionAction],
     task_ctx: ExecutionContext[CJAction],
-    run_cfg: CriterionJudgmentTaskConfig
 ):
     session = task_ctx.session
     plan = session.ctx.get_plan_typed(
@@ -32,7 +30,7 @@ def run(
         CriterionJudgmentPlan
     )
 
-    instruction_slides = load_instructions(run_cfg.instructions_path)
+    instruction_slides = load_instructions(session.ctx.assets.profile / "instructions.yaml")
 
     emit_task_start(session.ctx)
     end_reason = EndReason.COMPLETE

@@ -1,26 +1,22 @@
-from pathlib import Path
-from mcj.runtime.ids import make_subject_code
-from os import add_dll_directory
 import sys
+from pathlib import Path
+
+from mcj.runtime.tasks import Task
+from mcj.runtime.setup_types import TaskAssetPaths
+from mcj.runtime.profiles import ExperimentProfile
+from mcj.runtime.ids import make_subject_code
 
 class _Paths:
     def __init__(self) -> None:
         self._root: Path | None = None
-        self._subject_id: int | None = None
 
-    def initialize(self, root: Path, subject_id: int) -> None:
+    def initialize(self, root: Path) -> None:
         self._root = root
-        self._subject_id = subject_id
 
     def _require_root(self) -> Path:
         if self._root is None:
-            raise RuntimeError("paths.initialize(root, subject_id) must be called first")
+            raise RuntimeError("paths.initialize(root) must be called first")
         return self._root
-
-    def _require_subject_id(self) -> int:
-        if self._subject_id is None:
-            raise RuntimeError("paths.initialize(root, subject_id) must be called first")
-        return self._subject_id
 
     @property
     def ROOT(self) -> Path:
@@ -28,7 +24,7 @@ class _Paths:
 
     @property
     def ASSETS(self) -> Path:
-        return self.ROOT / "assets"
+        return self.ROOT / "assets" 
 
     @property
     def WORDS_CSV(self) -> Path:
@@ -40,7 +36,7 @@ class _Paths:
 
     @property
     def DATA(self) -> Path:
-        return self.ROOT / "data" / make_subject_code(self._require_subject_id())
+        return self.ROOT / "data"
 
     @property
     def EXTERNAL(self) -> Path:
@@ -51,7 +47,27 @@ class _Paths:
         arch = "x64" if sys.maxsize > 2**32 else "i386"
         return self.EXTERNAL / "ftd2xx" / arch
 
-    def add_ftd2xx_dll_directory(self) -> None:
-        add_dll_directory(str(paths.FTD2XX))
+    def asset_paths_for_profile(
+        self,
+        task: Task,
+        profile: ExperimentProfile
+    ) -> TaskAssetPaths:
+        return TaskAssetPaths(
+            task_root=self.ASSETS / task.value,
+            base=self.ASSETS / task.value / "base",
+            profile=self.ASSETS / task.value / profile.value,
+        )
+
+    def data_dir_for_profile(self, task: Task, profile: ExperimentProfile, subject_id: int | None) -> Path:
+        base = self.DATA / task.value / profile.value
+
+        if profile.requires_subject_id:
+            assert subject_id is not None
+            return base / make_subject_code(subject_id)
+
+        else:
+            from datetime import datetime
+            ts = datetime.now().strftime("%Y%m%d_%H%M%S")
+            return base / ts
 
 paths = _Paths()

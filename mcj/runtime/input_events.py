@@ -4,7 +4,7 @@ from enum import Enum
 
 class ButtonDevice(str, Enum):
     KEYBOARD="keyboard"
-    CEDRUS="Cedrus Lumina"
+    CEDRUS="cedrus"
     SCRIPT="script"
 
 @dataclass(frozen=True)

@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import Any
 from mcj.runtime.exceptions import CriterionJudgmentPlanError
 from mcj.plans.criterion_judgment.schema import CriterionJudgmentCondition
+from mcj.runtime.profiles import ExperimentProfile
 from mcj.stimuli.schema import WordTable
 
 
@@ -39,12 +40,13 @@ def _validate_word_sequence(
             f"{sorted(invalid_words)}"
         )
 
-def _validate_session_plan(data: dict[str, Any]) -> None:
+def _validate_session_plan(data: dict[str, Any], profile: ExperimentProfile) -> None:
     required_keys = {
-        "subject_id",
         "left_response",
         "blocks"
     }
+    if profile.requires_subject_id:
+        required_keys.add("subject_id")
 
     missing = required_keys - data.keys()
     if missing:
@@ -81,15 +83,17 @@ def _validate_block_plan(data: dict[str, Any], *, word_table: WordTable) -> None
         )
 
 
-def validate_criterion_judgment_plan(data: dict[str, Any], word_table: WordTable) -> None:
+def validate_criterion_judgment_plan(data: dict[str, Any], profile: ExperimentProfile, word_table: WordTable) -> None:
     """
     Validate the structure and contents of a session plan dictionary.
 
     Raises:
         CriterionJudgmentPlanError on first failure.
     """
-    _validate_subject_id(data)
-    _validate_session_plan(data)
+    if profile.requires_subject_id:
+        _validate_subject_id(data)
+
+    _validate_session_plan(data, profile)
     _validate_block_plan(data, word_table=word_table)
 
 

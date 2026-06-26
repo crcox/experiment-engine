@@ -1,11 +1,12 @@
 from typing import Callable
+from pathlib import Path
 
 from mcj.config.experiment import CONFIG_BY_PROFILE
 from mcj.config.paths import paths
 
 from mcj.plans.criterion_judgment.loader import load_criterion_judgment_plan
 
-from mcj.runtime.config_types import TaskProfileConfigs
+from mcj.runtime.config_types import TaskConfigBundle
 from mcj.runtime.recorders import DebugRecorderAdapter
 from mcj.runtime.session import SessionRuntime
 from mcj.runtime.session_context import SessionContext
@@ -19,7 +20,7 @@ from mcj.runtime.display_profile import (
     NULL_DISPLAY,
 )
 
-from mcj.runtime.input import InputManager, InputMode
+from mcj.runtime.input import InputManager
 from mcj.runtime.input_config import resolve_input_adapters, resolve_script_drivers, get_mock_cedrus_device
 from mcj.runtime.session_info import SessionInfo
 
@@ -27,6 +28,7 @@ from mcj.runtime.scripting.scheduler import ScriptScheduler
 
 from mcj.io.loggers import EventTypeLogger
 
+from mcj.runtime.setup_types import TaskAssetPaths
 from mcj.stimuli.loader import load_word_metadata_csv
 
 from mcj.adapters.psychopy.display import PsychoPyStimFactory
@@ -36,10 +38,15 @@ from mcj.adapters.fake.display import FakeFactory
 def build_session(
     session_info: SessionInfo,
     backend: RenderBackend
-) -> tuple[SessionRuntime, TaskProfileConfigs, EventTypeLogger]:
+) -> tuple[SessionRuntime, TaskConfigBundle, EventTypeLogger]:
 
-    profile = session_info.task_profile
-    word_table = load_word_metadata_csv()
+    data_dir = resolve_data_dir(session_info)
+    assets = resolve_assets(session_info)
+
+    profile = session_info.profile
+    word_table = load_word_metadata_csv(
+        base_assets_dir=assets.base
+    )
     clock = resolve_clock(backend)
 
     input_adapters = resolve_input_adapters(
@@ -67,14 +74,17 @@ def build_session(
     ctx = SessionContext(
         _plans={
             'criterion_judgment': load_criterion_judgment_plan(
+                profile_assets_dir=assets.profile,
                 profile=profile,
                 subject_id=session_info.subject_id,
                 word_table=word_table
             )
         },
+        assets=assets,
+        data_dir=data_dir,
         clock=clock,
         input=InputManager(input_adapters),
-        input_mode=InputMode(session_info.input_mode),
+        input_mode=session_info.input_mode,
         recorder=EventRecorder(adapters=(DebugRecorderAdapter(),)),
     )
 
@@ -93,7 +103,7 @@ def build_session(
 
     # --- Instantiate loggers ---
     session_logger = EventTypeLogger(
-        paths.DATA / "session.events.jsonl",
+        data_dir / "session.events.jsonl",
         SESSION_EVENTS
     )
 
@@ -144,3 +154,16 @@ def resolve_clock(backend: RenderBackend) -> Callable[[], float]:
 
     else:
         raise RuntimeError("Unknown render backend")
+
+
+def resolve_data_dir(session_info: SessionInfo) -> Path:
+    task = session_info.task
+    profile = session_info.profile
+    subject_id = session_info.subject_id
+    return paths.data_dir_for_profile(task, profile, subject_id)
+
+def resolve_assets(session_info: SessionInfo) -> TaskAssetPaths:
+    task = session_info.task
+    profile = session_info.profile
+    return paths.asset_paths_for_profile(task, profile)
+

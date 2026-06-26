@@ -1,7 +1,8 @@
 import json
+from pathlib import Path
 from mcj.config.paths import paths
 from mcj.stimuli.schema import WordTable
-from mcj.runtime.profiles import TaskProfile
+from mcj.runtime.profiles import ExperimentProfile
 from mcj.runtime.ids import make_subject_code
 from mcj.plans.criterion_judgment.schema import (
     CriterionJudgmentPlan,
@@ -16,7 +17,7 @@ from mcj.plans.criterion_judgment.validation import validate_criterion_judgment_
 from typing import Sequence, Any
 
 
-def _build_criterion_judgment_plan(data: dict[str, Any], *, word_table: WordTable):
+def _build_criterion_judgment_plan(data: dict[str, Any], *, profile: ExperimentProfile, word_table: WordTable):
     def _build_trials(word_sequence: Sequence[str], word_table: WordTable) -> Sequence[CriterionJudgmentTrial]:
         return [
             CriterionJudgmentTrial(
@@ -36,45 +37,41 @@ def _build_criterion_judgment_plan(data: dict[str, Any], *, word_table: WordTabl
             trials=_build_trials(block['word_sequence'], word_table) 
         ) for i, block in enumerate(data['blocks'])
     ]
+
+    if profile.requires_subject_id:
+        subject_id = data['subject_id']
+    else:
+        subject_id = None
+
     return CriterionJudgmentPlan(
-        subject_id=data['subject_id'],
+        subject_id=subject_id,
         left_response=data['left_response'],
-        blocks=blocks
+        blocks=blocks,
     )
 
 
-def load_criterion_judgment_plan(profile: TaskProfile, subject_id: int, word_table: WordTable) -> CriterionJudgmentPlan:
-    """
-    Load and validate a CriterionJudgmentPlan from a JSON file.
+def load_criterion_judgment_plan(
+    profile_assets_dir: Path,
+    profile: ExperimentProfile,
+    subject_id: int | None,
+    word_table: WordTable
+) -> CriterionJudgmentPlan:
 
-    Parameters:
-        path : Path
-            Path to a JSON file containing a trial plan.
+    if profile.requires_subject_id:
+        if subject_id is None:
+            raise RuntimeError(f"A subject ID is required when loading a CriterionJudgmentPlan under the {profile.value} profile.")
 
-    Returns:
-        SessionPlan
-            A validated SessionPlan dictionary.
-
-    Raises:
-        CriterionJudgmentPlanError
-            If the file is missing required keys or contains invalid types.
-    """
-    
-    if profile == TaskProfile.PRACTICE:
-        path = paths.ASSETS / "practice" / "practice.json"
-    elif profile == TaskProfile.MAIN:
         subject_code = make_subject_code(subject_id)
-        path = paths.ASSETS / "subjects" / f"{subject_code}.json"
-    elif profile == TaskProfile.DEV:
-        path = paths.ASSETS / "practice" / "practice.json"
-    else:
-        raise RuntimeError(f"Unhandled profile {profile!r}")
+        path = profile_assets_dir / f"{subject_code}.json"
 
+    else:
+        path = profile_assets_dir / "plan.json"
+    
     with path.open("r", encoding="utf-8") as f:
         data = json.load(f)
 
-    validate_criterion_judgment_plan(data, word_table=word_table)
-    return _build_criterion_judgment_plan(data, word_table=word_table)
+    validate_criterion_judgment_plan(data, profile=profile, word_table=word_table)
+    return _build_criterion_judgment_plan(data, profile=profile, word_table=word_table)
 
 
 

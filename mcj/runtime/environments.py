@@ -6,8 +6,12 @@ class Environment(str, Enum):
 
     @property
     def allows_feedback(self) -> bool:
-        return self != Environment.SCANNER
+        return self in {
+            Environment.LOCAL,
+        }
 
     @property
     def allows_definition(self) -> bool:
-        return self != Environment.SCANNER
+        return self in {
+            Environment.LOCAL,
+        }

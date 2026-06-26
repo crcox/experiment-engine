@@ -43,7 +43,7 @@ def run_block(factory: StimFactory, *,
             end_time=trial_timing[0].fixation_on
         )
 
-        if environment.allows_definition:
+        if environment.allows_definition and block_plan.condition.requires_definition:
             present_definition(factory, block_index, end_time=None, run_ctx=run_ctx)
 
         for trial_index, trial in enumerate(block_plan.trials):

@@ -3,7 +3,7 @@ from pathlib import Path
 
 from mcj.config.paths import paths
 from mcj.runtime.backend import RenderBackend
-from mcj.runtime.setup import build_session, resolve_display
+from mcj.runtime.setup import build_session
 from mcj.runtime.scripting.events import ScriptEvent
 from mcj.dev.session_info import StaticSessionInfoProvider
 from mcj.runtime.synchronization import sync_cedrus_and_experiment_clocks
@@ -45,7 +45,6 @@ def test_simulation_backend(with_time: bool=False):
 
     paths.initialize(
         root=Path.cwd(),
-        subject_id=session_info.subject_id,
     )
 
     session, _, _ = build_session(session_info, backend=RENDER_BACKEND)
@@ -87,7 +86,6 @@ def test_alignment():
 
     paths.initialize(
         root=Path.cwd(),
-        subject_id=session_info.subject_id,
     )
 
     session, _, _ = build_session(session_info, backend=RENDER_BACKEND)

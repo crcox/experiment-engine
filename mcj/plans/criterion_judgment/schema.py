@@ -11,6 +11,13 @@ class CriterionJudgmentCondition(str, Enum):
     DANGER="danger"
     ORTHOGRAPHY="orthography"
 
+    @property
+    def requires_definition(self):
+        return self in {
+            CriterionJudgmentCondition.SIZE,
+            CriterionJudgmentCondition.DANGER,
+        }
+
 class CriterionJudgmentResponse(str, Enum):
     YES="yes"
     NO="no"
@@ -103,7 +110,7 @@ class CriterionJudgmentPlan(TaskPlan):
     Complete immutable plan for running MCJ
     for a single subject in a single session.
     """
-    subject_id: int
+    subject_id: int | None
     blocks: Sequence[CriterionJudgmentBlockPlan]
     left_response: CriterionJudgmentResponse
 

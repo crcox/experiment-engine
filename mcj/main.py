@@ -20,7 +20,6 @@ from mcj.runtime.emitters import (
     emit_profile_set,
 )
 from mcj.runtime.end_reasons import EndReason
-from mcj.runtime.profiles import TaskProfile
 from mcj.runtime.setup import build_session, resolve_display
 
 # --- Task Runtime and Configuration ---
@@ -28,7 +27,6 @@ from mcj.tasks.criterion_judgment.display import (
     CriterionJudgmentPromptDisplay,
     CriterionJudgmentDefinitionDisplay,
 )
-from mcj.tasks.criterion_judgment.config import  CriterionJudgmentTaskConfig
 from mcj.tasks.criterion_judgment.actions import CJAction
 from mcj.tasks.criterion_judgment import task as cj_task
 
@@ -45,14 +43,14 @@ DEV_ENVIRONMENT = True
 RENDER_BACKEND = RenderBackend.FAKE
 
 if DEV_ENVIRONMENT or RENDER_BACKEND == RenderBackend.FAKE:
-    from mcj.dev.scripts import test_practice_script
+    from mcj.dev.scripts import test_dev_script
 
     provider = StaticSessionInfoProvider({
-        "subject_id": 999,
+        "task": "criterion_judgment",
         "environment": "local",
         "profile": "dev",
-        "input_mode": "simulated",
-        "script": test_practice_script()
+        "input_mode": "simulated_direct",
+        "script": test_dev_script()
     })
 else:
     provider = PsychoPyDialogProvider()
@@ -64,7 +62,6 @@ def run():
 
     paths.initialize(
         root=Path.cwd(),
-        subject_id=session_info.subject_id,
     )
 
     session, profile_bundle, session_logger = build_session(session_info, backend=RENDER_BACKEND)
@@ -72,13 +69,13 @@ def run():
     factory, display = resolve_display(session_info, backend=RENDER_BACKEND, dev_environment=DEV_ENVIRONMENT)
 
     # --- Write session.json ---
-    paths.DATA.mkdir(parents=True, exist_ok=True)
-    with open(paths.DATA / "session.json", 'w', encoding='utf-8') as f: 
+    session.ctx.data_dir.mkdir(parents=True, exist_ok=True)
+    with open(session.ctx.data_dir / "session.json", 'w', encoding='utf-8') as f: 
         json.dump({
             "type": "session_start",
             "time": session.ctx.now(),
             "subject_id": session_info.subject_id,
-            "profile": session_info.task_profile.value,
+            "profile": session_info.profile.value,
             "environment": session_info.environment.value,
             "input_mode": session_info.input_mode.value,
             "display": display.to_dict(),
@@ -89,7 +86,7 @@ def run():
     # --- Start Session ---
     emit_session_start(session.ctx)
     emit_environment_set(session.ctx, session_info.environment)
-    emit_profile_set(session.ctx, session_info.task_profile)
+    emit_profile_set(session.ctx, session_info.profile)
 
     end_reason = EndReason.COMPLETE
     end_cause = None
@@ -109,19 +106,10 @@ def run():
             profile_cfg=profile_bundle["task"],
         )
 
-        run_cfg = CriterionJudgmentTaskConfig(
-            instructions_path = {
-                TaskProfile.PRACTICE: paths.INSTRUCTIONS / "practice.yaml",
-                TaskProfile.MAIN: paths.INSTRUCTIONS / "main.yaml",
-                TaskProfile.DEV: paths.INSTRUCTIONS / "practice.yaml",
-            }[session_info.task_profile]
-        )
-
         cj_task.run(
             factory,
             instruction_ctx=instruction_ctx,
             task_ctx=task_ctx,
-            run_cfg=run_cfg,
         )
 
     except ExperimentAbort as e:

@@ -1,7 +1,9 @@
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Mapping, TypeVar, Type
 
 from mcj.runtime.recorders import RecorderAdapter
+from mcj.runtime.setup_types import TaskAssetPaths
 from mcj.runtime.time import Clock
 from mcj.runtime.input import InputManager, InputMode
 from mcj.runtime.events import EventRecorder
@@ -21,6 +23,8 @@ class SessionContext:
     """
     
     _plans: Mapping[str, TaskPlan]
+    assets: TaskAssetPaths
+    data_dir: Path
     clock: Clock
     input: InputManager
     input_mode: InputMode

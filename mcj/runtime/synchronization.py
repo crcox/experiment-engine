@@ -18,7 +18,7 @@ class SimpleAlignment:
 def sync_cedrus_and_experiment_clocks(session: SessionRuntime) -> Alignment:
     ctx = session.ctx
 
-    if ctx.input_mode == InputMode.SCRIPTED:
+    if ctx.input_mode == InputMode.SIMULATED_DIRECT:
         t = ctx.now()
         return Alignment(
             t0_system_s=t,

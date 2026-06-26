@@ -1,5 +1,5 @@
 from mcj.runtime.time import Clock
-from mcj.runtime.input import InputAdapter, AdapterType
+from mcj.runtime.input import InputAdapter
 from mcj.runtime.input_events import ButtonEvent, TriggerEvent, ButtonDevice
 
 from mcj.runtime.scripting.scheduler import ScriptScheduler
@@ -19,10 +19,6 @@ class ScriptedInputAdapter(InputAdapter):
         self._clock = clock
         self._scheduler = scheduler
         self._event_buffer = []
-
-    @property
-    def adapter_type(self) -> AdapterType:
-        return AdapterType.SCRIPTED
 
     def update(self) -> None:
         ready_events = self._scheduler.pop_ready_events()

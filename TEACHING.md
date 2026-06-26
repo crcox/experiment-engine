@@ -515,7 +515,7 @@ Roles let you test quickly without rewriting your task.
 |----------|-----------------|
 | DEV      | fast testing    |
 | PRACTICE | learning        |
-| MAIN     | real experiment |
+| EXPERIMENT     | real experiment |
 
 
 ✅ What roles are NOT

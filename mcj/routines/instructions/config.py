@@ -1,11 +1,11 @@
-from mcj.runtime.config_types import TaskProfileConfigs
+from mcj.runtime.config_types import TaskConfigBundle
 from mcj.runtime.profiles import TaskProfileConfig
 from mcj.runtime.states import InstructionState
 from mcj.runtime.mapping import key_mapping
 from mcj.runtime.termination import ActionTermination
 from mcj.routines.instructions.actions import InstructionAction
 
-def get_task_config(bundle: TaskProfileConfigs) -> TaskProfileConfig[InstructionAction]:
+def get_task_config(bundle: TaskConfigBundle) -> TaskProfileConfig[InstructionAction]:
     return bundle["instructions"]
 
 def build_instruction_profile_config() -> TaskProfileConfig[InstructionAction]:

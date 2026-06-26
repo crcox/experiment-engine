@@ -1,4 +1,4 @@
-from mcj.runtime.input import InputMode, AdapterType, InputAdapter, InputChannel
+from mcj.runtime.input import InputMode, InputChannel, InputAdapter
 from mcj.runtime.input_types import AdapterFactory
 from mcj.runtime.keyboard import KeyboardAdapter
 from mcj.runtime.cedrus import CedrusAdapter
@@ -16,24 +16,26 @@ from mcj.adapters.pyxid2.mock import MockXidDevice
 
 def resolve_input_adapters(session_info: SessionInfo, clock: Clock) -> list[InputAdapter]:
     input_mode = session_info.input_mode
+    adapters: list[InputAdapter] = []
 
     # --- global override (event-level simulation)
-    if input_mode == InputMode.SIMULATED and simulation_mode == SimulationMode.SCRIPTED:
-        return [
-            ADAPTER_FACTORIES[AdapterType.SCRIPTED](clock, session_info)
-        ]
+    if input_mode == InputMode.SIMULATED_DIRECT:
+        # None channel = channel-less (direct scripted input, no devices)
+        DIRECT_KEY = (InputMode.SIMULATED_DIRECT, None)
+        factory = ADAPTER_FACTORIES[DIRECT_KEY]
+        adapters.append(factory(clock, session_info))
+        return adapters
 
     # --- otherwise: compose channels
     channels = ENVIRONMENT_CHANNELS[session_info.environment]
 
-    adapters = []
     for channel in channels:
-        if input_mode not in CHANNEL_IMPLEMENTATIONS[channel]:
+        key = (input_mode, channel)
+        if key not in ADAPTER_FACTORIES:
             raise RuntimeError(
-                f"No implementation defined for channel={channel} with backend={input_mode}"
+                f"No implementation defined for channel={channel} with input_mode={input_mode}"
             )
-        impl_key = CHANNEL_IMPLEMENTATIONS[channel][input_mode]
-        factory = ADAPTER_FACTORIES[impl_key]
+        factory = ADAPTER_FACTORIES[key]
         adapters.append(factory(clock, session_info))
 
     return adapters
@@ -45,10 +47,10 @@ def resolve_script_drivers(
     clock: Clock,
     adapters: list[InputAdapter],
 ):
-    drivers = []
-
     if session_info.script is None:
-        return drivers
+        return []
+
+    drivers = []
 
     # --- Cedrus scripting via mock device ---
     cedrus_device = get_mock_cedrus_device(adapters)
@@ -95,7 +97,7 @@ def get_mock_cedrus_device(adapters: list[InputAdapter]) -> MockXidDevice | None
 
 def build_scripted(clock: Clock, session_info: SessionInfo):
     if session_info.script is None:
-        raise RuntimeError("Attempting to build a ScriptedInputAdapted, but no script was provided")
+        raise RuntimeError("Attempting to build a ScriptedInputAdapter, but no script was provided")
 
     return ScriptedInputAdapter(
         clock=clock,
@@ -105,10 +107,11 @@ def build_scripted(clock: Clock, session_info: SessionInfo):
         )
     )
 
-ADAPTER_FACTORIES: dict[tuple[InputChannel, InputMode], AdapterFactory] = {
-    (InputChannel.KEYBOARD, InputMode.REAL): build_keyboard,
-    (InputChannel.CEDRUS, InputMode.REAL): build_cedrus,
-    (InputChannel.KEYBOARD, InputMode.SIMULATED): build_keyboard,
-    (InputChannel.CEDRUS, InputMode.SIMULATED): build_cedrus_mock,
+ADAPTER_FACTORIES: dict[tuple[InputMode, InputChannel | None], AdapterFactory] = {
+    (InputMode.REAL            , InputChannel.KEYBOARD): build_keyboard,
+    (InputMode.SIMULATED_DEVICE, InputChannel.KEYBOARD): build_keyboard,
+    (InputMode.REAL            , InputChannel.CEDRUS  ): build_cedrus,
+    (InputMode.SIMULATED_DEVICE, InputChannel.CEDRUS  ): build_cedrus_mock,
+    (InputMode.SIMULATED_DIRECT, None                 ): build_scripted,
 }
 

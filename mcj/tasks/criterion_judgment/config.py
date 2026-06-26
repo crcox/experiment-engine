@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from pathlib import Path
 
-from mcj.runtime.config_types import TaskProfileConfigs
+from mcj.runtime.config_types import TaskConfigBundle
 from mcj.runtime.profiles import TaskProfileConfig, FeedbackConfig, FeedbackStimulusConfig, ResponseMarkConfig
 from mcj.runtime.mapping import key_mapping, dynamic_mapping, no_op
 from mcj.runtime.states import TrialState, PromptState, DefinitionState
@@ -15,7 +15,7 @@ from mcj.tasks.criterion_judgment.actions import CJAction
 class CriterionJudgmentTaskConfig:
     instructions_path: Path
 
-def get_task_config(bundle: TaskProfileConfigs) -> TaskProfileConfig[CJAction]:
+def get_task_config(bundle: TaskConfigBundle) -> TaskProfileConfig[CJAction]:
     return bundle["task"]
 
 def build_practice_profile_config() -> TaskProfileConfig[CJAction]:
@@ -47,7 +47,7 @@ def build_practice_profile_config() -> TaskProfileConfig[CJAction]:
     )
 
 
-def build_main_profile_config() -> TaskProfileConfig[CJAction]:
+def build_experiment_profile_config(test: bool = False) -> TaskProfileConfig[CJAction]:
     return TaskProfileConfig(
         termination_by_state={
             PromptState.PROMPT: TimeTermination(),
@@ -61,9 +61,9 @@ def build_main_profile_config() -> TaskProfileConfig[CJAction]:
             TrialState.STIMULUS: dynamic_mapping(build_action_mapping),
             TrialState.FEEDBACK: no_op(),
         },
-        prompt_duration_seconds = 12.0,
-        fixation_duration_seconds =  4.0,
-        stimulus_duration_seconds =  2.0,
+        prompt_duration_seconds = 12.0 if not test else 2.0,
+        fixation_duration_seconds =  4.0 if not test else 0.25,
+        stimulus_duration_seconds =  2.0 if not test else 0.5,
         response_mark = ResponseMarkConfig(),
         feedback = None
     )
@@ -105,3 +105,4 @@ def build_dev_profile_config() -> TaskProfileConfig[CJAction]:
             )
         )
     )
+

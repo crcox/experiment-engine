@@ -4,7 +4,7 @@ from collections import deque
 
 from mcj.runtime.time import Clock
 from mcj.runtime.input_events import ButtonEvent, ButtonDevice
-from mcj.runtime.input import InputAdapter, AdapterType
+from mcj.runtime.input import InputAdapter
 
 from mcj.adapters.psychopy.api import get_keypresses
 from mcj.adapters.psychopy.protocols import KeyboardLike
@@ -49,11 +49,6 @@ class KeyboardAdapter(InputAdapter):
             self._kb = kb
 
         self._event_buffer: deque[ButtonEvent] = deque()
-
-
-    @property
-    def adapter_type(self) -> AdapterType:
-        return AdapterType.KEYBOARD
 
 
     def update(self) -> None:

@@ -20,7 +20,7 @@ from __future__ import annotations
 # a flat structure. Avoid nesting lists and dictionaries within event fields
 # unless it is absolutely necessary.
 from mcj.runtime.environments import Environment
-from mcj.runtime.profiles import TaskProfile
+from mcj.runtime.profiles import ExperimentProfile
 from mcj.runtime.input_events import ButtonEvent, TriggerEvent
 from mcj.runtime.end_reasons import EndReason
 from mcj.runtime.session_context import SessionContext
@@ -64,7 +64,7 @@ def emit_environment_set(
 
 def emit_profile_set(
     ctx: SessionContext,
-    profile: TaskProfile
+    profile: ExperimentProfile
 ):
     ctx.recorder.emit({
         "type": "profile_set",

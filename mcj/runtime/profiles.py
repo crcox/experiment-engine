@@ -13,10 +13,15 @@ from mcj.runtime.mapping import ActionMappingByState
 
 ActionT = TypeVar("ActionT")
 
-class TaskProfile(str, Enum):
-    MAIN="main"
+class ExperimentProfile(str, Enum):
+    EXPERIMENT="experiment"
     PRACTICE="practice"
     DEV="dev"
+    TEST_EXPERIMENT="test_experiment"
+
+    @property
+    def requires_subject_id(self):
+        return self in {ExperimentProfile.EXPERIMENT, ExperimentProfile.PRACTICE}
 
 @dataclass(frozen=True)
 class FeedbackStimulusConfig:
