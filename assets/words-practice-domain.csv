@@ -1,9 +1,0 @@
-domain,danger,size,word,orthography
-nonliving,safe,small,salad,uppercase
-living,dangerous,big,hippopotamus,uppercase
-living,safe,big,goose,uppercase
-nonliving,safe,small,uppercase
-nonliving,dangerous,big,sledgehammer,lowercase
-living,dangerous,small,rat,lowercase
-living,safe,small,earthworm,lowercase
-nonliving,dangerous,big,guillotine,lowercase

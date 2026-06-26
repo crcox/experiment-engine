@@ -1,0 +1,58 @@
+{
+    "subject_id": 1,
+    "left_response": "yes",
+    "blocks": [
+        {
+            "condition": "domain",
+            "word_sequence": [
+                "salad",
+                "hippopotamus",
+                "goose",
+                "napkin",
+                "sledgehammer",
+                "rat",
+                "earthworm",
+                "guillotine"
+            ]
+        },
+        {
+            "condition": "size",
+            "word_sequence": [
+                "salad",
+                "hippopotamus",
+                "goose",
+                "napkin",
+                "sledgehammer",
+                "rat",
+                "earthworm",
+                "guillotine"
+            ]
+        },
+        {
+            "condition": "danger",
+            "word_sequence": [
+                "salad",
+                "hippopotamus",
+                "goose",
+                "napkin",
+                "sledgehammer",
+                "rat",
+                "earthworm",
+                "guillotine"
+            ]
+        },
+        {
+            "condition": "orthography",
+            "word_sequence": [
+                "salad",
+                "hippopotamus",
+                "goose",
+                "napkin",
+                "sledgehammer",
+                "rat",
+                "earthworm",
+                "guillotine"
+            ]
+        }
+    ]
+}
