@@ -9,4 +9,6 @@ pyrightconfig.json
 pyrightconfig_laptop.json
 pyrightconfig_office.json
 
+external/
+
 all_enums.py
