@@ -2,6 +2,7 @@ from mcj.runtime.input import InputMode, InputChannel, InputAdapter
 from mcj.runtime.input_types import AdapterFactory
 from mcj.runtime.keyboard import KeyboardAdapter
 from mcj.runtime.cedrus import CedrusAdapter
+from mcj.runtime.scripting.direct_driver import DirectScriptDriver
 from mcj.runtime.scripting.input_adapter import ScriptedInputAdapter
 from mcj.runtime.scripting.scheduler import ScriptScheduler
 from mcj.runtime.session_info import SessionInfo
@@ -21,9 +22,6 @@ def resolve_input_adapters(session_info: SessionInfo, clock: Clock) -> list[Inpu
     # --- global override (event-level simulation)
     if input_mode == InputMode.SIMULATED_DIRECT:
         # None channel = channel-less (direct scripted input, no devices)
-        DIRECT_KEY = (InputMode.SIMULATED_DIRECT, None)
-        factory = ADAPTER_FACTORIES[DIRECT_KEY]
-        adapters.append(factory(clock, session_info))
         return adapters
 
     # --- otherwise: compose channels
@@ -51,6 +49,9 @@ def resolve_script_drivers(
         return []
 
     drivers = []
+
+    if session_info.input_mode == InputMode.SIMULATED_DIRECT:
+        drivers.append(DirectScriptDriver(clock, ctx.input))
 
     # --- Cedrus scripting via mock device ---
     cedrus_device = get_mock_cedrus_device(adapters)

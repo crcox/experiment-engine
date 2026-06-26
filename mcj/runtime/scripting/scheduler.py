@@ -1,6 +1,7 @@
 from collections import deque
 from typing import Sequence
 
+from mcj.runtime.exceptions import ScriptExhaustedError
 from mcj.runtime.scripting.events import ScriptEvent
 from mcj.runtime.time import Clock
 
@@ -21,7 +22,7 @@ class ScriptScheduler:
         elapsed = now - self._start_time
 
         if not self._script:
-            return []
+            raise ScriptExhaustedError
 
         events = []
 
@@ -47,9 +48,6 @@ class ScriptScheduler:
         return events
 
     def pop_script_event(self) -> ScriptEvent:
-        """
-        Return a script event without modifying self._script.
-        """
         return self._script.popleft()
 
     def peek_script_event(self, index: int = 0) -> ScriptEvent:
@@ -61,6 +59,10 @@ class ScriptScheduler:
     @property
     def is_finished(self) -> bool:
         return not self._script
+
+    @property
+    def remaining_events(self) -> int:
+        return len(self._script)
 
     @property
     def reset(self):

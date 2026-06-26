@@ -7,4 +7,5 @@ class EndReason(str, Enum):
     ERROR="error"
     INVALID_INPUT="invalid_input"
     TIMEOUT="timeout"
+    SCRIPT_EXHAUSTED="script_exhausted"
 

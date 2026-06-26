@@ -73,6 +73,9 @@ class InputManager:
         self._buffer.clear()
         return events
 
+    def inject_event(self, event):
+        self._buffer.append(event)
+
     def clear(self):
         for adapter in self._adapters:
             adapter.clear()

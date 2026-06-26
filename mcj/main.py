@@ -12,7 +12,7 @@ from mcj.config.experiment import EXPERIMENT_NAME
 # --- Runtime core ---
 from mcj.runtime.backend import RenderBackend
 from mcj.runtime.execution import ExecutionContext
-from mcj.runtime.exceptions import ExperimentAbort
+from mcj.runtime.exceptions import ExperimentAbort, ScriptNotExhaustedError
 from mcj.runtime.emitters import (
     emit_session_start,
     emit_session_end,
@@ -123,6 +123,9 @@ def run():
         raise
 
     finally:
+        if session.scheduler is not None and not session.scheduler.is_finished:
+            raise ScriptNotExhaustedError(remaining_events=session.scheduler.remaining_events)
+
         emit_session_end(session.ctx, reason=end_reason, cause=end_cause)
         session_logger.write_new(session.ctx.recorder)
         factory.close()

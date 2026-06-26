@@ -63,3 +63,18 @@ class SessionInfoError(ExperimentAbort):
         )
 
 
+class ScriptExhaustedError(ExperimentAbort):
+    def __init__(self, message: str | None = None):
+        super().__init__(
+            reason = EndReason.SCRIPT_EXHAUSTED,
+            cause = "script_too_short",
+            message = message or "During the simulation, the script queue was emptied before the task run was done requesting events. Check that your script contains all expected events."
+        )
+
+class ScriptNotExhaustedError(ExperimentAbort):
+    def __init__(self, *, message: str | None = None, remaining_events: int):
+        super().__init__(
+            reason = EndReason.SCRIPT_EXHAUSTED,
+            cause = "script_too_long",
+            message = message or f"During the simulation, the task run completed but the script queue still contains {remaining_events} scripted events. Check that your script contains only expected events."
+        )
