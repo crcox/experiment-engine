@@ -22,7 +22,6 @@ class KeyToActionMapping(ActionMapping[ActionT], Generic[ActionT]):
     mapping: dict[str, ActionT]
 
     def interpret(self, event: ButtonEvent) -> ActionT | None:
-        print(f"event.code={event.code}, mapping={self.mapping}")
         return self.mapping.get(event.code)
 
 

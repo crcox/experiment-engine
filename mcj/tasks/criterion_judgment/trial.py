@@ -105,7 +105,6 @@ def run_trial(
             end_time_seconds=scheduled_end_time,
             action_ref=lambda: last_action.get()
         )
-        print(done)
 
         if state == TrialState.FIXATION:
             emit_fixation_start(ctx)
@@ -190,11 +189,9 @@ def run_trial(
                         raise EscapePressed
 
                     action = mapping.interpret(event)
-                    print(f"action={action}")
                     if action is not None and last_action.get() is None:
                         last_action.set(action)
                         emit_action(ctx, action)
-                        print(f"last_action.get()={last_action.get()}")
 
                         if last_action.get() in (CJAction.LEFT, CJAction.RIGHT):
                             assert isinstance(mapping, InputActionMapping)

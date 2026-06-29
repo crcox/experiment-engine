@@ -49,7 +49,7 @@ if DEV_ENVIRONMENT or RENDER_BACKEND == RenderBackend.FAKE:
         "task": "criterion_judgment",
         "environment": "local",
         "profile": "dev",
-        "input_mode": "simulated_direct",
+        "input_mode": "simulated_device",
         "script": test_dev_script()
     })
 else:

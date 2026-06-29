@@ -49,7 +49,6 @@ class ActionTermination(TerminationCondition[ActionT]):
             raise RuntimeError("ActionTermination only checks for a response, and will wait indefinitely. Thus, end_time_second must be None. Did you mean to use ActionOrTimeoutTermination?")
 
         def has_terminal_action() -> bool:
-            print(f"action_ref()={action_ref()}, self.terminal_actions={self.terminal_actions}")
             return action_ref() in self.terminal_actions
 
         return lambda: has_terminal_action()

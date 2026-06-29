@@ -1,10 +1,10 @@
-from mcj.runtime.input import InputMode, InputChannel, InputAdapter
+from typing import Sequence
+
+from mcj.runtime.input import InputManager, InputMode, InputChannel, InputAdapter
 from mcj.runtime.input_types import AdapterFactory
 from mcj.runtime.keyboard import KeyboardAdapter
 from mcj.runtime.cedrus import CedrusAdapter
 from mcj.runtime.scripting.direct_driver import DirectScriptDriver
-from mcj.runtime.scripting.input_adapter import ScriptedInputAdapter
-from mcj.runtime.scripting.scheduler import ScriptScheduler
 from mcj.runtime.session_info import SessionInfo
 from mcj.runtime.time import Clock
 
@@ -43,15 +43,17 @@ def resolve_input_adapters(session_info: SessionInfo, clock: Clock) -> list[Inpu
 def resolve_script_drivers(
     session_info: SessionInfo,
     clock: Clock,
-    adapters: list[InputAdapter],
+    input_manager: InputManager
 ):
     if session_info.script is None:
         return []
 
+    adapters = input_manager.get_adapters()
+
     drivers = []
 
     if session_info.input_mode == InputMode.SIMULATED_DIRECT:
-        drivers.append(DirectScriptDriver(clock, ctx.input))
+        drivers.append(DirectScriptDriver(clock, input_manager))
 
     # --- Cedrus scripting via mock device ---
     cedrus_device = get_mock_cedrus_device(adapters)
@@ -87,7 +89,7 @@ def build_cedrus_mock(clock: Clock, _: SessionInfo):
         device=device
     )
 
-def get_mock_cedrus_device(adapters: list[InputAdapter]) -> MockXidDevice | None:
+def get_mock_cedrus_device(adapters: Sequence[InputAdapter]) -> MockXidDevice | None:
     for a in adapters:
         if isinstance(a, CedrusAdapter):
             device = a.device
@@ -96,23 +98,11 @@ def get_mock_cedrus_device(adapters: list[InputAdapter]) -> MockXidDevice | None
 
     return None
 
-def build_scripted(clock: Clock, session_info: SessionInfo):
-    if session_info.script is None:
-        raise RuntimeError("Attempting to build a ScriptedInputAdapter, but no script was provided")
-
-    return ScriptedInputAdapter(
-        clock=clock,
-        scheduler=ScriptScheduler(
-            clock = clock,
-            script=session_info.script
-        )
-    )
 
 ADAPTER_FACTORIES: dict[tuple[InputMode, InputChannel | None], AdapterFactory] = {
     (InputMode.REAL            , InputChannel.KEYBOARD): build_keyboard,
     (InputMode.SIMULATED_DEVICE, InputChannel.KEYBOARD): build_keyboard,
     (InputMode.REAL            , InputChannel.CEDRUS  ): build_cedrus,
     (InputMode.SIMULATED_DEVICE, InputChannel.CEDRUS  ): build_cedrus_mock,
-    (InputMode.SIMULATED_DIRECT, None                 ): build_scripted,
 }
 

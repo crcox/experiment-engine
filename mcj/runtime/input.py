@@ -73,8 +73,9 @@ class InputManager:
         self._buffer.clear()
         return events
 
-    def inject_event(self, event):
+    def inject_event(self, event: ButtonEvent | TriggerEvent) -> None:
         self._buffer.append(event)
+
 
     def clear(self):
         for adapter in self._adapters:
@@ -91,6 +92,9 @@ class InputManager:
 
     def has_adapter(self, adapter_cls: Type[T]) -> bool:
         return any(isinstance(a, adapter_cls) for a in self._adapters)
+
+    def get_adapters(self) -> Sequence[InputAdapter]:
+        return self._adapters
 
     def was_pressed(self, code: str) -> bool:
         for event in self._buffer:

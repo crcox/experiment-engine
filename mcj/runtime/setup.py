@@ -54,7 +54,8 @@ def build_session(
         clock
     )
 
-    script_drivers = resolve_script_drivers(session_info, clock, input_adapters)
+    input_manager = InputManager(input_adapters)
+    script_drivers = resolve_script_drivers(session_info, clock, input_manager)
 
     block_start_hooks: list[Callable] = []
     block_end_hooks: list[Callable] = []
@@ -83,7 +84,7 @@ def build_session(
         assets=assets,
         data_dir=data_dir,
         clock=clock,
-        input=InputManager(input_adapters),
+        input=input_manager,
         input_mode=session_info.input_mode,
         recorder=EventRecorder(adapters=(DebugRecorderAdapter(),)),
     )
@@ -135,7 +136,7 @@ def resolve_display(session_info: SessionInfo, backend: RenderBackend, dev_envir
         factory = PsychoPyStimFactory(win)
 
     elif backend == RenderBackend.FAKE:
-        factory = FakeFactory()
+        factory = FakeFactory(verbose=True)
         display = NULL_DISPLAY
     else:
         raise RuntimeError("Unknown render backend")

@@ -5,8 +5,8 @@ class FakeText(TextElement):
     def __init__(self, name: str, cfg: dict[str, Any], verbose: bool=False):
         self.name = name
         self.cfg = {}
-        self._verbose = verbose
         self.text: str = ""
+        self._verbose = verbose
 
         if self._verbose:
             print(f"CREATE {self.name}")
@@ -50,6 +50,10 @@ class FakeShape(ShapeElement):
         return f"<FakeShape name={self.name!r}>"
 
 class FakeFactory(StimFactory):
+
+    def __init__(self, verbose=False):
+        self._verbose=verbose
+
     def create_text(
         self,
         *,
@@ -72,7 +76,7 @@ class FakeFactory(StimFactory):
             "anchorVert": anchor_vert,
             "anchorHoriz": anchor_horiz,
         }
-        return FakeText(name, self.cfg)
+        return FakeText(name, self.cfg, verbose=self._verbose)
 
     def create_known_shape(
         self,
@@ -85,6 +89,7 @@ class FakeFactory(StimFactory):
         line: LineConfig | None = None,
         anchor_vert: Literal["top", "bottom", "center"] = "center",
         anchor_horiz: Literal["left", "right", "center"] = "center",
+        verbose: bool = False
     ) -> ShapeElement:
         if line is not None:
             line_width=line.width,
@@ -102,11 +107,12 @@ class FakeFactory(StimFactory):
             "color": color, # pyright: ignore
             "anchor": anchor_vert+anchor_horiz,
         }
-        return FakeShape(name, cfg)
+        return FakeShape(name, cfg, verbose=verbose)
 
 
     def flip(self):
-        print("FLIP")
+        if self._verbose:
+            print("FLIP")
 
     def call_on_flip(self, func: Callable[..., Any], *args: Any, **kwargs: Any) -> None:
         func(*args, **kwargs)
