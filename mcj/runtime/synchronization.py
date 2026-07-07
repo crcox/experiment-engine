@@ -1,19 +1,88 @@
 import time
 
-from dataclasses import dataclass
-
-from mcj.runtime.time import Clock
 from mcj.runtime.session import SessionRuntime
-from mcj.runtime.emitters import emit_alignment_start, emit_alignment_end
+from mcj.runtime.emitters import emit_alignment_start, emit_alignment_end, emit_alignment, emit_wait_for_trigger_start, emit_wait_for_trigger_end
 from mcj.runtime.end_reasons import EndReason
-from mcj.runtime.exceptions import ExperimentAbort, EscapePressed, CedrusAlignmentTimout
-from mcj.runtime.input_events import ButtonEvent
+from mcj.runtime.exceptions import ExperimentAbort, EscapePressed, CedrusAlignmentTimout, WaitForTriggerTimout
+from mcj.runtime.input_events import ButtonEvent, TriggerEvent
 from mcj.runtime.input import InputMode
 from mcj.runtime.cedrus import CedrusAdapter, Alignment
 
-@dataclass(frozen=True)
-class SimpleAlignment:
-    t0_system: float
+WAIT_FOR_TRIGGER_TIMEOUT_SECONDS = 10.0
+
+def wait_for_block_start(session: SessionRuntime) -> Alignment:
+    ctx = session.ctx
+
+    if ctx.input_mode == InputMode.SIMULATED_DIRECT:
+        t = ctx.now()
+        return Alignment(
+            t0_system_s=t,
+            t0_device_ms=round(t*1000),
+        )
+
+    cedrus_adapter = ctx.input.require_adapter(CedrusAdapter)
+
+    emit_wait_for_trigger_start(ctx)
+    end_reason = EndReason.COMPLETE
+    end_cause = None
+
+    trigger_received = False
+    alignment_emitted = False
+
+    try:
+        # --- Ensure the adapter and device hold no stale trigger events ---
+        cedrus_adapter.clear()
+
+        start = ctx.now()
+        while not trigger_received:
+            if ctx.now() - start > WAIT_FOR_TRIGGER_TIMEOUT_SECONDS:
+                raise WaitForTriggerTimout
+
+            if not cedrus_adapter.is_aligned:
+                t_before = ctx.now()
+                cedrus_adapter.set_last_t_before(t_before)
+
+            session.maybe_step_simulation()
+            ctx.input.update()
+
+            for event in ctx.input.peek_events():
+                if isinstance(event, ButtonEvent) and event.is_press:
+                    if event.code == "escape":
+                        raise EscapePressed
+
+                if isinstance(event, TriggerEvent) and event.is_press:
+                    trigger_received = True
+
+            time.sleep(0.0005)
+
+            if cedrus_adapter.is_aligned and not alignment_emitted:
+                alignment = cedrus_adapter.require_alignment()
+                emit_alignment(
+                    ctx,
+                    t0_device=float(alignment.t0_device_ms / 1000),
+                    t0_system=alignment.t0_system_s,
+                )
+                alignment_emitted = True
+
+        return alignment
+
+    except ExperimentAbort as e:
+        end_reason = e.reason
+        end_cause = e.cause
+        raise
+
+    except Exception as e:
+        end_reason = EndReason.ERROR
+        end_cause = type(e).__name__
+        raise
+
+    finally:
+        emit_wait_for_trigger_end(
+            ctx,
+            reason=end_reason,
+            cause=end_cause
+        )
+
 
 def sync_cedrus_and_experiment_clocks(session: SessionRuntime) -> Alignment:
     ctx = session.ctx
@@ -26,6 +95,10 @@ def sync_cedrus_and_experiment_clocks(session: SessionRuntime) -> Alignment:
         )
 
     cedrus_adapter = ctx.input.require_adapter(CedrusAdapter)
+
+    if cedrus_adapter.is_aligned:
+        alignment = cedrus_adapter.require_alignment()
+        return alignment
 
     emit_alignment_start(ctx)
     t0_device = None

@@ -111,3 +111,37 @@ def emit_alignment_end(
         "cause": cause,
     })
 
+def emit_alignment(
+        ctx: SessionContext,
+        *,
+        t0_device: float | None,
+        t0_system: float | None,
+    ) -> None:
+    ctx.recorder.emit({
+        "type": "alignment",
+        "time": ctx.now(),
+        "t0_device": t0_device,
+        "t0_system": t0_system,
+    })
+
+def emit_wait_for_trigger_start(
+        ctx: SessionContext,
+    ) -> None:
+    ctx.recorder.emit({
+        "type": "wait_for_trigger_start",
+        "time": ctx.now()
+    })
+
+def emit_wait_for_trigger_end(
+        ctx: SessionContext,
+        *,
+        reason: EndReason,
+        cause: str | None,
+    ) -> None:
+    ctx.recorder.emit({
+        "type": "wait_for_trigger_end",
+        "time": ctx.now(),
+        "reason": reason,
+        "cause": cause,
+    })
+

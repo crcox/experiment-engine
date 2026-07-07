@@ -15,3 +15,15 @@ class Environment(str, Enum):
         return self in {
             Environment.LOCAL,
         }
+
+    @property
+    def requires_alignment(self) -> bool:
+        return self in {
+            Environment.SCANNER,
+        }
+
+    @property
+    def waits_for_trigger(self) -> bool:
+        return self in {
+            Environment.SCANNER,
+        }

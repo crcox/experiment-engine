@@ -40,7 +40,6 @@ class InputAdapter(ABC):
     def clear(self) -> None:
         pass
 
-
 T = TypeVar("T", bound=InputAdapter)
 
 class InputManager:
@@ -71,6 +70,7 @@ class InputManager:
     def pop_events(self) -> Sequence[ButtonEvent | TriggerEvent]:
         events = list(self._buffer)
         self._buffer.clear()
+        print(f"[DEBUG] InputManager popped events: {events}")
         return events
 
     def inject_event(self, event: ButtonEvent | TriggerEvent) -> None:

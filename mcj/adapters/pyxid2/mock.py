@@ -58,10 +58,12 @@ class MockXidDevice(XidDeviceLike):
         })
 
     def simulate_button(self, key: int):
+        print(f"[DEBUG] MockXidDevice simulate_button({key})")
         self._emit(key, True)
         self._emit(key, False)
 
     def simulate_trigger(self):
+        print(f"[DEBUG] MockXidDevice simulate_trigger()")
         self._emit(self._trigger_key, True)
         self._emit(self._trigger_key, False)
 

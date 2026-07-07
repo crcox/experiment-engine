@@ -91,12 +91,14 @@ class CedrusAdapter(InputAdapter):
         Ingest events from Cedrus device, perform alignment if needed,
         and stage aligned events for consumption.
         """
+        print("[DEBUG] CedrusAdapter.update() called")
         t_before = self._last_t_before
         self._last_t_before = None
 
         self.device.poll_for_response()
 
         while self.device.response_queue_size():
+            print("[DEBUG] CedrusAdapter saw event in device queue")
             xid_event = pop_next_xid_event(self.device)
 
             if xid_event is not None:
@@ -105,6 +107,7 @@ class CedrusAdapter(InputAdapter):
                 self._maybe_align(stamped, t_before)
 
                 if self._align is not None:
+                    print("[DEBUG] CedrusAdapter appending event to buffer")
                     typed_event = self._convert_event(stamped)
                     self._event_buffer.append(typed_event)
                 else:

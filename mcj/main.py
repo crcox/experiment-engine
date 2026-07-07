@@ -43,14 +43,14 @@ DEV_ENVIRONMENT = True
 RENDER_BACKEND = RenderBackend.FAKE
 
 if DEV_ENVIRONMENT or RENDER_BACKEND == RenderBackend.FAKE:
-    from mcj.dev.scripts import test_dev_script
+    from mcj.dev.scripts import test_dev_scanner_script
 
     provider = StaticSessionInfoProvider({
         "task": "criterion_judgment",
-        "environment": "local",
+        "environment": "scanner",
         "profile": "dev",
         "input_mode": "simulated_device",
-        "script": test_dev_script()
+        "script": test_dev_scanner_script()
     })
 else:
     provider = PsychoPyDialogProvider()
@@ -123,12 +123,12 @@ def run():
         raise
 
     finally:
-        if session.scheduler is not None and not session.scheduler.is_finished:
-            raise ScriptNotExhaustedError(remaining_events=session.scheduler.remaining_events)
-
         emit_session_end(session.ctx, reason=end_reason, cause=end_cause)
         session_logger.write_new(session.ctx.recorder)
         factory.close()
+        if session.scheduler is not None and not session.scheduler.is_finished:
+            raise ScriptNotExhaustedError(remaining_events=session.scheduler.remaining_events)
+
 
 
 if __name__ == "__main__":

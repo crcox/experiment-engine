@@ -3,6 +3,9 @@ from typing import Callable
 from mcj.runtime.scripting.builder import ScriptBuilder
 
 # The following helpers are for use with repeat() and sequence()
+def instruction_slide(s: ScriptBuilder):
+    return s.press("space")
+
 def fixation(s: ScriptBuilder):
     return s.press("space")
 

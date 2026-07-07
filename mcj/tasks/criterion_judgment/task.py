@@ -8,7 +8,7 @@ from mcj.runtime.environments import Environment
 from mcj.runtime.tasks import Task
 from mcj.runtime.exceptions import ExperimentAbort
 from mcj.runtime.end_reasons import EndReason
-from mcj.runtime.synchronization import sync_cedrus_and_experiment_clocks
+from mcj.runtime.synchronization import wait_for_block_start 
 from mcj.runtime.display_primitives import StimFactory
 
 from mcj.routines.instructions.instructions import present_instructions
@@ -45,7 +45,7 @@ def run(
         
         for block_index in range(plan.nblocks):
             if session.environment == Environment.SCANNER:
-                alignment = sync_cedrus_and_experiment_clocks(session)
+                alignment = wait_for_block_start(session)
                 t0 = alignment.t0_system_s
             else:
                 t0 = session.ctx.now()

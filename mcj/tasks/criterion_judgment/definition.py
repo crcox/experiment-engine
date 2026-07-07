@@ -13,7 +13,6 @@ from mcj.plans.criterion_judgment.schema import (
 from mcj.plans.criterion_judgment.prompts_loader import load_prompt
 from mcj.tasks.criterion_judgment.display import CriterionJudgmentDefinitionDisplay
 from mcj.tasks.criterion_judgment.emitters import (
-    emit_condition_set,
     emit_definition_start,
     emit_definition_end,
 )
@@ -62,7 +61,6 @@ def present_definition(
     draw = display.draw
 
     # --- Start definition
-    emit_condition_set(ctx, condition=block_plan.condition)
     end_reason = EndReason.COMPLETE
     end_cause = None
 

@@ -136,7 +136,7 @@ def resolve_display(session_info: SessionInfo, backend: RenderBackend, dev_envir
         factory = PsychoPyStimFactory(win)
 
     elif backend == RenderBackend.FAKE:
-        factory = FakeFactory(verbose=True)
+        factory = FakeFactory(verbose=False)
         display = NULL_DISPLAY
     else:
         raise RuntimeError("Unknown render backend")

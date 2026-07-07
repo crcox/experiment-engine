@@ -5,7 +5,7 @@ from dataclasses import dataclass
 from collections import deque
 
 from mcj.runtime.time import Clock
-from mcj.runtime.input import InputAdapter, AdapterType
+from mcj.runtime.input import InputAdapter
 from mcj.runtime.input_events import ButtonEvent, TriggerEvent, ButtonDevice
 
 @dataclass(frozen=True)
@@ -27,10 +27,6 @@ class ScriptedInputAdapter(InputAdapter):
         self._clock = clock
         self._script = deque(script)
         self._event_buffer = []
-
-    @property
-    def adapter_type(self) -> AdapterType:
-        return AdapterType.SCRIPTED
 
     def update(self) -> None:
         now = self._clock()

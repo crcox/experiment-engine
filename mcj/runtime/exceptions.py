@@ -24,12 +24,21 @@ class EscapePressed(ExperimentAbort):
         )
 
 class CedrusAlignmentTimout(ExperimentAbort):
-    """Raised when the user presses Escape to abort the session."""
+    """Raised when a trigger has not arrived within an expected interval."""
     def __init__(self):
         super().__init__(
             reason=EndReason.TIMEOUT,
             cause="cedrus_alignment",
             message="Cedrus alignment timed out"
+        )
+
+class WaitForTriggerTimout(ExperimentAbort):
+    """Raised when a trigger has not arrived within an expected interval."""
+    def __init__(self):
+        super().__init__(
+            reason=EndReason.TIMEOUT,
+            cause="waiting_for_trigger",
+            message="Timed out while waiting for a trigger"
         )
 
 class CancelPressed(ExperimentAbort):

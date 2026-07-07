@@ -85,3 +85,10 @@ from mcj.tasks.criterion_judgment.trial import run_trial
 
 - 2026-06-24 19:02:55 — while working in c:\Users\chriscox\GitHub\experiment-engine\mcj\config\experiment.py
  I started to add RunMode, but that was premature. I should consolidate on TaskProfiles. Everything related to RunMode should be removed. 
+
+- 2026-06-29 11:20:38 — while working in C:\Users\chriscox\GitHub\experiment-engine\mcj\main.py
+ In the process of setting up a scanner environment simulation. 
+
+- 2026-07-05 14:07:31 — while working in c:\Users\chriscox\GitHub\experiment-engine\mcj\dev\scripts.py
+ We need to make sure alignment is required just once. 
+

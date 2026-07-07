@@ -9,6 +9,8 @@ import.log
 pyrightconfig.json
 pyrightconfig_laptop.json
 pyrightconfig_office.json
+debug.txt
+requirements-laptop.txt
 
 external/
 

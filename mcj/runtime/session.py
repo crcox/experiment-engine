@@ -25,5 +25,6 @@ class SessionRuntime:
         events = self.scheduler.pop_ready_events()
 
         for ev in events:
+            print("[DEBUG] Scheduler emitted:", ev)
             for driver in self.drivers:
                 driver.handle(ev)

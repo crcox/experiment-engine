@@ -9,7 +9,7 @@ from mcj.plans.criterion_judgment.schema import (
 )
 from mcj.plans.criterion_judgment.prompts_loader import load_prompt
 from mcj.tasks.criterion_judgment.display import CriterionJudgmentPromptDisplay
-from mcj.tasks.criterion_judgment.emitters import emit_condition_set, emit_prompt_start, emit_prompt_end
+from mcj.tasks.criterion_judgment.emitters import emit_prompt_start, emit_prompt_end
 from mcj.tasks.criterion_judgment.actions import CJAction
 from mcj.runtime.exceptions import EscapePressed
 from mcj.runtime.states import PromptState
@@ -57,7 +57,6 @@ def present_prompt(
     draw = display.draw
     
     # --- Start prompt
-    emit_condition_set(ctx, condition=block_plan.condition)
     emit_prompt_start(ctx)
 
     end_reason = EndReason.COMPLETE
