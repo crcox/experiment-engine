@@ -13,13 +13,6 @@ WAIT_FOR_TRIGGER_TIMEOUT_SECONDS = 10.0
 def wait_for_block_start(session: SessionRuntime) -> Alignment:
     ctx = session.ctx
 
-    if ctx.input_mode == InputMode.SIMULATED_DIRECT:
-        t = ctx.now()
-        return Alignment(
-            t0_system_s=t,
-            t0_device_ms=round(t*1000),
-        )
-
     cedrus_adapter = ctx.input.require_adapter(CedrusAdapter)
 
     emit_wait_for_trigger_start(ctx)
@@ -30,6 +23,13 @@ def wait_for_block_start(session: SessionRuntime) -> Alignment:
     alignment_emitted = False
 
     try:
+        if ctx.input_mode == InputMode.SIMULATED_DIRECT:
+            t = ctx.now()
+            return Alignment(
+                t0_system_s=t,
+                t0_device_ms=round(t*1000),
+            )
+
         # --- Ensure the adapter and device hold no stale trigger events ---
         cedrus_adapter.clear()
 

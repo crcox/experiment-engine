@@ -43,8 +43,10 @@ def run(
             run_ctx=instruction_ctx,
         )
         
+        print("[DEBUG]", session.environment)
         for block_index in range(plan.nblocks):
             if session.environment == Environment.SCANNER:
+                print("[DEBUG] BEFORE WAIT_FOR_BLOCK_START", session.environment)
                 alignment = wait_for_block_start(session)
                 t0 = alignment.t0_system_s
             else:

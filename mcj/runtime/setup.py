@@ -105,7 +105,6 @@ def build_session(
     # --- Instantiate loggers ---
     session_logger = EventTypeLogger(
         data_dir / "session.events.jsonl",
-        SESSION_EVENTS
     )
 
     return session, cfg, session_logger

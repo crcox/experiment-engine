@@ -129,7 +129,7 @@ def emit_wait_for_trigger_start(
     ) -> None:
     ctx.recorder.emit({
         "type": "wait_for_trigger_start",
-        "time": ctx.now()
+        "time": ctx.now(),
     })
 
 def emit_wait_for_trigger_end(

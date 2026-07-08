@@ -63,12 +63,15 @@ class BaseLogger(ABC):
 
 class EventTypeLogger(BaseLogger):
 
-    def __init__(self, output_path: Path, event_types: set[str]):
+    def __init__(self, output_path: Path, event_types: set[str] | None = None):
         super().__init__(output_path)
         self._event_types = event_types
 
     def _attend(self, events: Sequence[EventDict]) -> list[EventDict]:
-        return [e for e in events if e.get("type") in self._event_types]
+        if self._event_types is None:
+            return list(events)
+        else:
+            return [e for e in events if e.get("type") in self._event_types]
 
 
 class SamplingLogger(BaseLogger):
