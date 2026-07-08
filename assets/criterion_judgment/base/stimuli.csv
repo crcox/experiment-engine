@@ -47,3 +47,11 @@ brush,nonliving,small,safe,lowercase
 phone,nonliving,small,safe,uppercase
 sponge,nonliving,small,safe,uppercase
 spoon,nonliving,small,safe,lowercase
+salad,nonliving,small,safe,lowercase
+hippopotamus,living,big,dangerous,uppercase
+goose,living,big,safe,uppercase
+napkin,nonliving,small,safe,lowercase
+sledgehammer,nonliving,big,dangerous,lowercase
+rat,living,small,dangerous,uppercase
+earthworm,living,small,safe,uppercase
+guillotine,nonliving,big,dangerous,lowercase

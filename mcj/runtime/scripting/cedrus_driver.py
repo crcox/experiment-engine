@@ -24,8 +24,6 @@ class CedrusScriptDriver:
     def handle(self, ev: ScriptEvent) -> None:
         """Translate ScriptEvent → device action."""
 
-        print("[DEBUG] CedrusScriptDriver got:", ev)
-
         if ev.target != "cedrus":
             return
 

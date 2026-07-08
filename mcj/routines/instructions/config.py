@@ -16,9 +16,7 @@ def build_instruction_profile_config() -> TaskProfileConfig[InstructionAction]:
         action_mapping_by_state={
             InstructionState.INSTRUCTION: key_mapping({"space": InstructionAction.ADVANCE}),
         },
-        prompt_duration_seconds=None,
-        fixation_duration_seconds=None,
-        stimulus_duration_seconds=None,
+        timing=None,
         feedback=None,
         response_mark=None,
     )

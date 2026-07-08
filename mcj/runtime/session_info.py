@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
-from typing import Sequence, TypedDict, Any
+from enum import Enum
+from typing import Sequence, TypedDict, Any, Type, TypeVar
 from dataclasses import dataclass
 
 from mcj.runtime.input import InputMode
@@ -9,20 +10,26 @@ from mcj.runtime.environments import Environment
 from mcj.runtime.profiles import ExperimentProfile
 from mcj.runtime.exceptions import SessionInfoError
 
+EnumType = TypeVar("EnumType", bound=Enum)
+
 class RawSessionInfo(TypedDict, total=False):
+    task: str
     environment: str
     profile: str
-    subject_id: str
     input_mode: str
+    subject_id: str
     script: Sequence[ScriptEvent] | None
+    enable_triggers: bool
 
 def complete_session_info(raw: dict[str, Any]) -> RawSessionInfo:
     return RawSessionInfo(
+        task=str(raw["task"]),
         environment=str(raw["environment"]),
         profile=str(raw["profile"]),
-        subject_id=str(raw["subject_id"]),
+        subject_id=str(raw.get("subject_id", "")),
         input_mode=str(raw.get("input_mode", InputMode.REAL.value)),
         script=raw.get("script"),
+        enable_triggers=bool(raw.get("enable_triggers", False)),
     )
 
 @dataclass(frozen=True)
@@ -30,10 +37,10 @@ class SessionInfo:
     task: Task
     environment: Environment
     profile: ExperimentProfile
-    subject_id: int | None
     input_mode: InputMode
+    subject_id: int | None
     script: Sequence[ScriptEvent] | None
-    enable_triggers: bool = False
+    enable_triggers: bool
 
 class SessionInfoProvider(ABC):
 
@@ -42,36 +49,6 @@ class SessionInfoProvider(ABC):
 
 
 def parse_session_info(raw: RawSessionInfo) -> SessionInfo:
-    def parse_task(raw: RawSessionInfo) -> Task:
-        task_str = raw.get("task", "").strip()
-        if not task_str:
-            raise SessionInfoError("task is required")
-
-        try:
-            return Task(task_str)
-        except ValueError as e:
-            raise SessionInfoError(f"{task_str!r} does not correspond to a valid task") from e
-
-    def parse_environment(raw: RawSessionInfo) -> Environment:
-        environment_str = raw.get("environment", "").strip()
-        if not environment_str:
-            raise SessionInfoError("environment is required")
-
-        try:
-            return Environment(environment_str)
-        except ValueError as e:
-            raise SessionInfoError(f"{environment_str!r} does not correspond to a valid environment") from e
-
-    def parse_task_profile(raw: RawSessionInfo) -> ExperimentProfile:
-        task_profile_str = raw.get("profile", "").strip()
-        if not task_profile_str:
-            raise SessionInfoError("profile is required")
-
-        try:
-            return ExperimentProfile(task_profile_str)
-        except ValueError as e:
-            raise SessionInfoError(f"{task_profile_str!r} does not correspond to a valid ExperimentProfile") from e
-
     def parse_subject_id(raw: RawSessionInfo, profile: ExperimentProfile) -> int | None:
         subject_id_str = raw.get("subject_id", "").strip()
         if not subject_id_str:
@@ -84,14 +61,6 @@ def parse_session_info(raw: RawSessionInfo) -> SessionInfo:
             return int(subject_id_str)
         except (ValueError) as e:
             raise SessionInfoError("subject_id must be an integer") from e
-
-    def parse_input_mode(raw: RawSessionInfo) -> InputMode:
-        input_mode_str = raw.get("input_mode", InputMode.REAL.value).strip()
-
-        try:
-            return InputMode(input_mode_str)
-        except ValueError as e:
-            raise SessionInfoError(f"{input_mode_str!r} does not correspond to a valid input mode") from e
 
     def parse_script(raw: RawSessionInfo, input_mode: InputMode) -> Sequence[ScriptEvent] | None:
         script = raw.get("script")
@@ -110,12 +79,41 @@ def parse_session_info(raw: RawSessionInfo) -> SessionInfo:
 
         return script
 
-    task = parse_task(raw)
-    environment = parse_environment(raw)
-    profile = parse_task_profile(raw)
+    def parse_enable_triggers(raw):
+        value = raw.get("enable_triggers", False)
+
+        if not isinstance(value, bool):
+            raise SessionInfoError(
+                "enable_triggers must be a boolean"
+            )
+
+        return value
+
+    def parse_enum(
+        raw: RawSessionInfo,
+        field: str,
+        enum_type: Type[EnumType]
+    ) -> EnumType:
+        value = raw.get(field, "").strip()
+
+        if not value:
+            raise SessionInfoError(f"{field} is required")
+
+        try:
+            return enum_type(value)
+        except ValueError as e:
+            raise SessionInfoError(
+                f"{value!r} does not correspond to a valid {enum_type.__name__}"
+            ) from e
+
+    task = parse_enum(raw, "task", Task)
+    environment = parse_enum(raw, "environment", Environment)
+    profile = parse_enum(raw, "profile", ExperimentProfile)
+    input_mode = parse_enum(raw, "input_mode", InputMode)
+
     subject_id = parse_subject_id(raw, profile)
-    input_mode = parse_input_mode(raw)
     script = parse_script(raw, input_mode)
+    enable_triggers = parse_enable_triggers(raw)
 
     return SessionInfo(
         task=task,
@@ -124,4 +122,5 @@ def parse_session_info(raw: RawSessionInfo) -> SessionInfo:
         subject_id=subject_id,
         input_mode=input_mode,
         script=script,
+        enable_triggers=enable_triggers
     )

@@ -58,7 +58,7 @@ def run_trial(
     *,
     block_index: int,
     trial_index: int,
-    trial_timing: TrialTiming,
+    trial_timing: TrialTiming | None,
     run_ctx: ExecutionContext[CJAction],
 ) -> None:
     session = run_ctx.session
@@ -98,7 +98,12 @@ def run_trial(
     def enter_state(state: TrialState, last_action: ActionRef[CJAction], prev_response: Response | None) -> tuple[ActionMapping[CJAction], DonePredicate, Callable[[], None]]:
         mapping_factory = profile_cfg.action_mapping_by_state[state]
         mapping = mapping_factory(session)
-        scheduled_end_time = trial_timing.get_scheduled_end_time_for_state(state)
+
+        if trial_timing is not None:
+            scheduled_end_time = trial_timing.get_scheduled_end_time_for_state(state)
+        else:
+            scheduled_end_time = None
+
         termination = profile_cfg.termination_by_state[state]
         done = termination.make_done_predicate(
             ctx.now,

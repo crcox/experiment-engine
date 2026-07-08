@@ -10,7 +10,8 @@ from mcj.runtime.config_types import TaskConfigBundle
 from mcj.runtime.recorders import DebugRecorderAdapter
 from mcj.runtime.session import SessionRuntime
 from mcj.runtime.session_context import SessionContext
-from mcj.runtime.events import SESSION_EVENTS, EventRecorder
+from mcj.runtime.events import EventRecorder
+from mcj.runtime.emitters import emit_auto_triggering_start, emit_auto_triggering_end
 from mcj.runtime.environments import Environment
 from mcj.runtime.backend import RenderBackend
 from mcj.runtime.display_profile import (
@@ -62,9 +63,20 @@ def build_session(
 
     cedrus_device = get_mock_cedrus_device(input_adapters)
 
-    if cedrus_device and session_info.enable_triggers:
-        block_start_hooks.append(cedrus_device.start_auto_trigger)
-        block_end_hooks.append(cedrus_device.stop_auto_trigger)
+    print("[DEBUG] cedrus_device", cedrus_device)
+    print("[DEBUG] session_info.enable_triggers", session_info.enable_triggers)
+
+    if cedrus_device is not None and session_info.enable_triggers:
+        def start_auto_triggering():
+            emit_auto_triggering_start(ctx)
+            cedrus_device.start_auto_trigger()
+
+        def stop_auto_triggering():
+            cedrus_device.stop_auto_trigger()
+            emit_auto_triggering_end(ctx)
+
+        block_start_hooks.append(start_auto_triggering)
+        block_end_hooks.append(stop_auto_triggering)
 
     # --- Define Scheduler (for SCRIPTED and SIMULATED environments/backends) ---
     scheduler = None

@@ -4,11 +4,9 @@ from mcj.instructions.loader import load_instructions
 from mcj.plans.criterion_judgment.schema import CriterionJudgmentPlan
 from mcj.routines.instructions.actions import InstructionAction
 from mcj.runtime.execution import ExecutionContext
-from mcj.runtime.environments import Environment
 from mcj.runtime.tasks import Task
 from mcj.runtime.exceptions import ExperimentAbort
 from mcj.runtime.end_reasons import EndReason
-from mcj.runtime.synchronization import wait_for_block_start 
 from mcj.runtime.display_primitives import StimFactory
 
 from mcj.routines.instructions.instructions import present_instructions
@@ -16,10 +14,10 @@ from mcj.routines.instructions.instructions import present_instructions
 from mcj.tasks.criterion_judgment.actions import CJAction
 from mcj.tasks.criterion_judgment.emitters import emit_task_start, emit_task_end
 
-from mcj.tasks.criterion_judgment.block import run_block
+from mcj.tasks.criterion_judgment.block import execute_block
 
 
-def run(
+def run_task(
     factory: StimFactory,
     instruction_ctx: ExecutionContext[InstructionAction],
     task_ctx: ExecutionContext[CJAction],
@@ -45,18 +43,10 @@ def run(
         
         print("[DEBUG]", session.environment)
         for block_index in range(plan.nblocks):
-            if session.environment == Environment.SCANNER:
-                print("[DEBUG] BEFORE WAIT_FOR_BLOCK_START", session.environment)
-                alignment = wait_for_block_start(session)
-                t0 = alignment.t0_system_s
-            else:
-                t0 = session.ctx.now()
-
-            run_block(
+            execute_block(
                 factory,
                 block_index=block_index,
-                t0=t0,
-                run_ctx=task_ctx
+                run_ctx=task_ctx,
             )
 
     except ExperimentAbort as e:

@@ -42,14 +42,18 @@ class ResponseMarkConfig:
     height: float = 0.03
     y_offset: float = -0.1
 
+@dataclass(frozen=True)
+class TimingConfig:
+    prompt_duration_seconds: float | None = None
+    definition_duration_seconds: float | None = None
+    fixation_duration_seconds: float | None = None
+    stimulus_duration_seconds: float | None = None
 
 @dataclass(frozen=True)
 class TaskProfileConfig(Generic[ActionT]):
     termination_by_state: Mapping[State, TerminationCondition[ActionT]]
     action_mapping_by_state: ActionMappingByState[ActionT]
-    prompt_duration_seconds: float | None
-    fixation_duration_seconds: float | None
-    stimulus_duration_seconds: float | None
+    timing: TimingConfig | None
     feedback: FeedbackConfig | None
     response_mark : ResponseMarkConfig | None
 

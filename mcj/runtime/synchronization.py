@@ -10,7 +10,7 @@ from mcj.runtime.cedrus import CedrusAdapter, Alignment
 
 WAIT_FOR_TRIGGER_TIMEOUT_SECONDS = 10.0
 
-def wait_for_block_start(session: SessionRuntime) -> Alignment:
+def wait_for_block_start(session: SessionRuntime) -> float:
     ctx = session.ctx
 
     cedrus_adapter = ctx.input.require_adapter(CedrusAdapter)
@@ -21,14 +21,12 @@ def wait_for_block_start(session: SessionRuntime) -> Alignment:
 
     trigger_received = False
     alignment_emitted = False
+    t0_system_seconds = None
 
     try:
         if ctx.input_mode == InputMode.SIMULATED_DIRECT:
-            t = ctx.now()
-            return Alignment(
-                t0_system_s=t,
-                t0_device_ms=round(t*1000),
-            )
+            t0_system_seconds = ctx.now()
+            return t0_system_seconds
 
         # --- Ensure the adapter and device hold no stale trigger events ---
         cedrus_adapter.clear()
@@ -51,6 +49,7 @@ def wait_for_block_start(session: SessionRuntime) -> Alignment:
                         raise EscapePressed
 
                 if isinstance(event, TriggerEvent) and event.is_press:
+                    t0_system_seconds = event.time
                     trigger_received = True
 
             time.sleep(0.0005)
@@ -64,7 +63,11 @@ def wait_for_block_start(session: SessionRuntime) -> Alignment:
                 )
                 alignment_emitted = True
 
-        return alignment
+        if t0_system_seconds is None:
+            # I don't think it should be possible to end up here...
+            raise RuntimeWarning("A trigger never occured")
+
+        return t0_system_seconds
 
     except ExperimentAbort as e:
         end_reason = e.reason

@@ -34,16 +34,17 @@ def present_instructions(
     # --- Start Instructions
     index = 0
     emit_instruction_start(ctx)
-
-
     end_reason = EndReason.COMPLETE
     end_cause = None
 
+    slide = None
+
     try:
         while index < len(slides):
-            slide = slides[index]
-            emit_slide_start(ctx)
+            if not slide == slides[index]:
+                emit_slide_start(ctx)
 
+            slide = slides[index]
             session.maybe_step_simulation()
             ctx.input.update()
             display.update(slide)

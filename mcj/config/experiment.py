@@ -34,6 +34,10 @@ CONFIG_BY_PROFILE: dict[ExperimentProfile, TaskConfigBundle]  = {
     },
     ExperimentProfile.EXPERIMENT: {
         "instructions": build_instruction_profile_config(),
+        "task": build_experiment_profile_config(test=False),
+    },
+    ExperimentProfile.TEST_EXPERIMENT: {
+        "instructions": build_instruction_profile_config(),
         "task": build_experiment_profile_config(test=True),
     },
     ExperimentProfile.DEV: {

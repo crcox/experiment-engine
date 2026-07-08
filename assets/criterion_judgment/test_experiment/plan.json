@@ -1,0 +1,33 @@
+{
+    "left_response": "yes",
+    "blocks": [
+        {
+            "condition": "domain",
+            "word_sequence": [
+                "salad",
+                "hippopotamus"
+            ]
+        },
+        {
+            "condition": "size",
+            "word_sequence": [
+                "goose",
+                "napkin"
+            ]
+        },
+        {
+            "condition": "danger",
+            "word_sequence": [
+                "sledgehammer",
+                "rat"
+            ]
+        },
+        {
+            "condition": "orthography",
+            "word_sequence": [
+                "earthworm",
+                "guillotine"
+            ]
+        }
+    ]
+}

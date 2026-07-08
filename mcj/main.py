@@ -43,14 +43,15 @@ DEV_ENVIRONMENT = True
 RENDER_BACKEND = RenderBackend.FAKE
 
 if DEV_ENVIRONMENT or RENDER_BACKEND == RenderBackend.FAKE:
-    from mcj.dev.scripts import dev_scanner_device_no_display_script
+    from mcj.dev.scripts import test_experiment_scanner_script 
 
     provider = StaticSessionInfoProvider({
         "task": "criterion_judgment",
         "environment": "scanner",
-        "profile": "dev",
+        "profile": "test_experiment",
         "input_mode": "simulated_device",
-        "script": dev_scanner_device_no_display_script()
+        "script": test_experiment_scanner_script(),
+        "enable_triggers": True,
     })
 else:
     provider = PsychoPyDialogProvider()
@@ -106,7 +107,7 @@ def run():
             profile_cfg=profile_bundle["task"],
         )
 
-        cj_task.run(
+        cj_task.run_task(
             factory,
             instruction_ctx=instruction_ctx,
             task_ctx=task_ctx,

@@ -77,14 +77,23 @@ def emit_profile_set(
 emit_session_start = make_emitter("session_start")
 emit_session_end = make_emitter("session_end", has_reason=True)
 
-emit_block_start = make_indexed_emitter("block_start")
-emit_block_end = make_indexed_emitter("block_end", has_reason=True)
+emit_block_execution_start = make_indexed_emitter("block_execution_start")
+emit_block_execution_end = make_indexed_emitter("block_execution_end", has_reason=True)
+
+emit_block_preamble_start = make_indexed_emitter("block_preamble_start")
+emit_block_preamble_end = make_indexed_emitter("block_preamble_end", has_reason=True)
+
+emit_block_trials_start = make_indexed_emitter("block_trials_start")
+emit_block_trials_end = make_indexed_emitter("block_trials_end", has_reason=True)
 
 emit_trial_start = make_indexed_emitter("trial_start")
 emit_trial_end = make_indexed_emitter("trial_end", has_reason=True)
 
 emit_fixation_start = make_emitter("fixation_start")
 emit_fixation_end = make_emitter("fixation_end", has_reason=False)
+
+emit_auto_triggering_start = make_emitter("auto_triggering_start")
+emit_auto_triggering_end = make_emitter("auto_triggering_end", has_reason=False)
 
 def emit_alignment_start(
         ctx: SessionContext,
