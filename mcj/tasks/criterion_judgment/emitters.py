@@ -98,7 +98,7 @@ def emit_stimulus_start(
     orthography: str
 ):
     ctx.recorder.emit({
-        "type": "stimulus_start",
+        "type": CJEventType.STIMULUS_START.value,
         "time": ctx.now(),
         "word": word,
         "domain": domain,
@@ -113,7 +113,7 @@ def emit_stimulus_end(
     cause: str | None,
 ):
     ctx.recorder.emit({
-        "type": "stimulus_end",
+        "type": CJEventType.STIMULUS_END.value,
         "time": ctx.now(),
         "reason": reason,
         "cause": cause,
@@ -124,7 +124,7 @@ def emit_feedback_start(
     feedback: str
 ):
     ctx.recorder.emit({
-        "type": "feedback_start",
+        "type": CJEventType.FEEDBACK_START.value,
         "time": ctx.now(),
         "feedback": feedback,
     })
@@ -135,7 +135,7 @@ def emit_feedback_end(
     cause: str | None,
 ):
     ctx.recorder.emit({
-        "type": "feedback_end",
+        "type": CJEventType.FEEDBACK_END.value,
         "time": ctx.now(),
         "reason": reason,
         "cause": cause,

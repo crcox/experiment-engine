@@ -22,9 +22,9 @@ from __future__ import annotations
 from mcj.runtime.environments import Environment
 from mcj.runtime.profiles import ExperimentProfile
 from mcj.runtime.input_events import ButtonEvent, TriggerEvent
-from mcj.runtime.end_reasons import EndReason
 from mcj.runtime.session_context import SessionContext
 from mcj.runtime.emitter_factory import make_emitter, make_indexed_emitter
+from mcj.runtime.event_types import EventType
 
 
 # Mechanical Emitters ----
@@ -33,7 +33,7 @@ def emit_button_event(
         btn: ButtonEvent
     ) -> None:
     ctx.recorder.emit({
-        "type": "button_event",
+        "type": EventType.BUTTON_EVENT.value,
         "time": btn.time,
         "code": btn.code,
         "device": btn.device.value,
@@ -45,7 +45,7 @@ def emit_scanner_trigger(
         trigger: TriggerEvent
     ) -> None:
     ctx.recorder.emit({
-        "type": "scanner_trigger",
+        "type": EventType.SCANNER_TRIGGER.value,
         "time": trigger.time,
         "device": trigger.device.value,
         "is_press": trigger.is_press
@@ -57,7 +57,7 @@ def emit_environment_set(
     environment: Environment
 ):
     ctx.recorder.emit({
-        "type": "environment_set",
+        "type": EventType.ENVIRONMENT_SET.value,
         "environment": environment.value,
         "time": ctx.now()
     })
@@ -67,7 +67,7 @@ def emit_profile_set(
     profile: ExperimentProfile
 ):
     ctx.recorder.emit({
-        "type": "profile_set",
+        "type": EventType.PROFILE_SET.value,
         "profile": profile.value,
         "time": ctx.now()
     })
@@ -79,7 +79,7 @@ def emit_alignment(
         t0_system: float | None,
     ) -> None:
     ctx.recorder.emit({
-        "type": "alignment",
+        "type": EventType.ALIGNMENT.value,
         "time": ctx.now(),
         "t0_device": t0_device,
         "t0_system": t0_system,
@@ -87,55 +87,30 @@ def emit_alignment(
 
 
 # Structural emitters ----
-emit_session_start = make_emitter("session_start")
-emit_session_end = make_emitter("session_end", has_reason=True)
+emit_session_start = make_emitter(EventType.SESSION_START.value)
+emit_session_end = make_emitter(EventType.SESSION_END.value, has_reason=True)
 
-emit_block_execution_start = make_indexed_emitter("block_execution_start")
-emit_block_execution_end = make_indexed_emitter("block_execution_end", has_reason=True)
+emit_block_execution_start = make_indexed_emitter(EventType.BLOCK_EXECUTION_START.value)
+emit_block_execution_end = make_indexed_emitter(EventType.BLOCK_EXECUTION_END.value, has_reason=True)
 
-emit_block_preamble_start = make_indexed_emitter("block_preamble_start")
-emit_block_preamble_end = make_indexed_emitter("block_preamble_end", has_reason=True)
+emit_block_preamble_start = make_indexed_emitter(EventType.BLOCK_PREAMBLE_START.value)
+emit_block_preamble_end = make_indexed_emitter(EventType.BLOCK_PREAMBLE_END.value, has_reason=True)
 
-emit_block_trials_start = make_indexed_emitter("block_trials_start")
-emit_block_trials_end = make_indexed_emitter("block_trials_end", has_reason=True)
+emit_block_trials_start = make_indexed_emitter(EventType.BLOCK_TRIALS_START.value)
+emit_block_trials_end = make_indexed_emitter(EventType.BLOCK_TRIALS_END.value, has_reason=True)
 
-emit_trial_start = make_indexed_emitter("trial_start")
-emit_trial_end = make_indexed_emitter("trial_end", has_reason=True)
+emit_trial_start = make_indexed_emitter(EventType.TRIAL_START.value)
+emit_trial_end = make_indexed_emitter(EventType.TRIAL_END.value, has_reason=True)
 
-emit_fixation_start = make_emitter("fixation_start")
-emit_fixation_end = make_emitter("fixation_end", has_reason=False)
+emit_fixation_start = make_emitter(EventType.FIXATION_START.value)
+emit_fixation_end = make_emitter(EventType.FIXATION_END.value, has_reason=False)
 
-emit_auto_triggering_start = make_emitter("auto_triggering_start")
-emit_auto_triggering_end = make_emitter("auto_triggering_end", has_reason=False)
+emit_auto_triggering_start = make_emitter(EventType.AUTO_TRIGGERING_START.value)
+emit_auto_triggering_end = make_emitter(EventType.AUTO_TRIGGERING_END.value, has_reason=False)
 
-emit_wait_for_command_start = make_emitter("wait_for_command_start")
-emit_wait_for_command_end = make_emitter("wait_for_command_end", has_reason=True)
+emit_wait_for_command_start = make_emitter(EventType.WAIT_FOR_COMMAND_START.value)
+emit_wait_for_command_end = make_emitter(EventType.WAIT_FOR_COMMAND_END.value, has_reason=True)
 
-emit_wait_for_trigger_start = make_emitter("wait_for_trigger_start")
-emit_wait_for_trigger_end = make_emitter("wait_for_trigger_end", has_reason=True)
-
-def emit_alignment_start(
-        ctx: SessionContext,
-    ) -> None:
-    ctx.recorder.emit({
-        "type": "alignment_start",
-        "time": ctx.now()
-    })
-
-def emit_alignment_end(
-        ctx: SessionContext,
-        *,
-        t0_device: float | None,
-        t0_system: float | None,
-        reason: EndReason,
-        cause: str | None,
-    ) -> None:
-    ctx.recorder.emit({
-        "type": "alignment_end",
-        "time": ctx.now(),
-        "t0_device": t0_device,
-        "t0_system": t0_system,
-        "reason": reason,
-        "cause": cause,
-    })
+emit_wait_for_trigger_start = make_emitter(EventType.WAIT_FOR_TRIGGER_START.value)
+emit_wait_for_trigger_end = make_emitter(EventType.WAIT_FOR_TRIGGER_END.value, has_reason=True)
 
