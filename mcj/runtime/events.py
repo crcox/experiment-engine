@@ -1,8 +1,10 @@
 from __future__ import annotations
 
+from typing import Mapping
+
 from mcj.runtime.recorders import RecorderAdapter
 
-EventDict = dict[str, object]
+EventDict = Mapping[str, object]
 
 SESSION_EVENTS = {
     "session_start",
