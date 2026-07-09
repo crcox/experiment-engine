@@ -4,11 +4,11 @@ from mcj.runtime.emitters import emit_button_event, emit_scanner_trigger
 from mcj.runtime.end_reasons import EndReason
 from mcj.runtime.input_events import TriggerEvent, ButtonEvent
 from mcj.plans.criterion_judgment.schema import (
-    CriterionJudgmentPlan,
-    CriterionJudgmentResponse as Response
+    CJPlan,
+    CJResponse as Response
 )
 from mcj.plans.criterion_judgment.prompts_loader import load_prompt
-from mcj.tasks.criterion_judgment.display import CriterionJudgmentPromptDisplay
+from mcj.tasks.criterion_judgment.display import CJPromptDisplay
 from mcj.tasks.criterion_judgment.emitters import emit_prompt_start, emit_prompt_end
 from mcj.tasks.criterion_judgment.actions import CJAction
 from mcj.runtime.exceptions import EscapePressed
@@ -22,7 +22,7 @@ def present_prompt(
     ):
     session = run_ctx.session
     ctx = session.ctx
-    plan = ctx.get_plan_typed("criterion_judgment", CriterionJudgmentPlan)
+    plan = ctx.get_plan_typed("criterion_judgment", CJPlan)
     profile_cfg = run_ctx.profile_cfg
 
     # --- Build or select prompt configuration ---
@@ -31,7 +31,7 @@ def present_prompt(
     prompt = load_prompt(block_plan.condition)
 
 
-    display = CriterionJudgmentPromptDisplay(factory)
+    display = CJPromptDisplay(factory)
 
     state = PromptState.PROMPT
     mapping_factory = profile_cfg.action_mapping_by_state[state]
@@ -71,6 +71,12 @@ def present_prompt(
 
             events = ctx.input.pop_events()
             for event in events:
+                print(
+                    "[DEBUG POP]",
+                    type(event).__name__,
+                    getattr(event, "code", None),
+                    event.time,
+                )
                 if isinstance(event, TriggerEvent):
                     emit_scanner_trigger(ctx, event)
 
@@ -79,6 +85,13 @@ def present_prompt(
 
                     if event.code == "escape":
                         raise EscapePressed
+
+                    print(
+                        "[DEBUG RESPONSE]",
+                        "prompt",
+                        event.code,
+                        event.time,
+                    )
 
                     last_action = mapping.interpret(event)
                         

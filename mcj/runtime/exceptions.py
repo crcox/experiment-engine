@@ -59,7 +59,7 @@ class DataContractError(ExperimentAbort):
             message=message or "Invalid data encountered in input file"
         )
 
-class CriterionJudgmentPlanError(Exception):
+class CJPlanError(Exception):
     """Raised when a trial plan file is malformed or invalid."""
 
 class SessionInfoError(ExperimentAbort):

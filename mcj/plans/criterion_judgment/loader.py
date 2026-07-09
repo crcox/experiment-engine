@@ -1,14 +1,13 @@
 import json
 from pathlib import Path
-from mcj.config.paths import paths
 from mcj.stimuli.schema import WordTable
 from mcj.runtime.profiles import ExperimentProfile
 from mcj.runtime.ids import make_subject_code
 from mcj.plans.criterion_judgment.schema import (
-    CriterionJudgmentPlan,
-    CriterionJudgmentBlockPlan,
-    CriterionJudgmentCondition,
-    CriterionJudgmentTrial
+    CJPlan,
+    CJBlockPlan,
+    CJCondition,
+    CJTrial
 )
 
 
@@ -18,9 +17,9 @@ from typing import Sequence, Any
 
 
 def _build_criterion_judgment_plan(data: dict[str, Any], *, profile: ExperimentProfile, word_table: WordTable):
-    def _build_trials(word_sequence: Sequence[str], word_table: WordTable) -> Sequence[CriterionJudgmentTrial]:
+    def _build_trials(word_sequence: Sequence[str], word_table: WordTable) -> Sequence[CJTrial]:
         return [
-            CriterionJudgmentTrial(
+            CJTrial(
                 word=word_table[w].word,
                 domain=Domain(word_table[w].domain),
                 size=Size(word_table[w].size),
@@ -31,9 +30,9 @@ def _build_criterion_judgment_plan(data: dict[str, Any], *, profile: ExperimentP
         ]
 
     blocks = [
-        CriterionJudgmentBlockPlan(
+        CJBlockPlan(
             block_index=i,
-            condition=CriterionJudgmentCondition(block["condition"]),
+            condition=CJCondition(block["condition"]),
             trials=_build_trials(block['word_sequence'], word_table) 
         ) for i, block in enumerate(data['blocks'])
     ]
@@ -43,7 +42,7 @@ def _build_criterion_judgment_plan(data: dict[str, Any], *, profile: ExperimentP
     else:
         subject_id = None
 
-    return CriterionJudgmentPlan(
+    return CJPlan(
         subject_id=subject_id,
         left_response=data['left_response'],
         blocks=blocks,
@@ -55,7 +54,7 @@ def load_criterion_judgment_plan(
     profile: ExperimentProfile,
     subject_id: int | None,
     word_table: WordTable
-) -> CriterionJudgmentPlan:
+) -> CJPlan:
 
     if profile.requires_subject_id:
         if subject_id is None:

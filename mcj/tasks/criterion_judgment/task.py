@@ -1,16 +1,12 @@
 from __future__ import annotations
 
 from mcj.instructions.loader import load_instructions
-from mcj.plans.criterion_judgment.schema import CriterionJudgmentPlan
+from mcj.plans.criterion_judgment.schema import CJPlan
 from mcj.routines.instructions.actions import InstructionAction
 from mcj.runtime.execution import ExecutionContext
 from mcj.runtime.tasks import Task
 from mcj.runtime.exceptions import ExperimentAbort
 from mcj.runtime.end_reasons import EndReason
-<<<<<<< HEAD
-=======
-from mcj.runtime.synchronization import wait_for_block_start, wait_for_command
->>>>>>> 6a5909c (Refactor block execution and timing)
 from mcj.runtime.display_primitives import StimFactory
 
 from mcj.routines.instructions.instructions import present_instructions
@@ -29,7 +25,7 @@ def run_task(
     session = task_ctx.session
     plan = session.ctx.get_plan_typed(
         Task.CRITERION_JUDGMENT,
-        CriterionJudgmentPlan
+        CJPlan
     )
 
     instruction_slides = load_instructions(session.ctx.assets.profile / "instructions.yaml")

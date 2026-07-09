@@ -1,8 +1,8 @@
 from __future__ import annotations
 
 from typing import Any
-from mcj.runtime.exceptions import CriterionJudgmentPlanError
-from mcj.plans.criterion_judgment.schema import CriterionJudgmentCondition
+from mcj.runtime.exceptions import CJPlanError
+from mcj.plans.criterion_judgment.schema import CJCondition
 from mcj.runtime.profiles import ExperimentProfile
 from mcj.stimuli.schema import WordTable
 
@@ -10,18 +10,18 @@ from mcj.stimuli.schema import WordTable
 def _validate_subject_id(data: dict[str, Any]) -> None:
     subject_id = data["subject_id"]
     if not isinstance(subject_id, int):
-        raise CriterionJudgmentPlanError(
+        raise CJPlanError(
             f"`subject_id` must be an integer; got {type(subject_id).__name__!r}"
         )
 
 
 def _validate_condition(raw:  Any) -> None:
     if not isinstance(raw, str):
-        raise CriterionJudgmentPlanError(
+        raise CJPlanError(
             f"`condition` must be a string; got {type(raw).__name__!r}"
         )
 
-    CriterionJudgmentCondition(raw)
+    CJCondition(raw)
 
 
 def _validate_word_sequence(
@@ -35,7 +35,7 @@ def _validate_word_sequence(
 
     invalid_words = seq_words - valid_words
     if invalid_words:
-        raise CriterionJudgmentPlanError(
+        raise CJPlanError(
             f"`{context}` contains invalid word strings: "
             f"{sorted(invalid_words)}"
         )
@@ -50,29 +50,29 @@ def _validate_session_plan(data: dict[str, Any], profile: ExperimentProfile) -> 
 
     missing = required_keys - data.keys()
     if missing:
-        raise CriterionJudgmentPlanError(
+        raise CJPlanError(
             f"SessionPlan is missing required keys: {sorted(missing)}"
         )
 
 def _validate_block_plan(data: dict[str, Any], *, word_table: WordTable) -> None:
     blocks = data["blocks"]
     if not isinstance(blocks, list):
-        raise CriterionJudgmentPlanError("`blocks` must be a list[dict[str, list[str]]]")
+        raise CJPlanError("`blocks` must be a list[dict[str, list[str]]]")
 
     for block in blocks:
         if not isinstance(block, dict):
-            raise CriterionJudgmentPlanError("Each `block` must be a dict[str, list[str]]")
+            raise CJPlanError("Each `block` must be a dict[str, list[str]]")
 
         if "condition" not in block:
-            raise CriterionJudgmentPlanError("Each `block` dict must have key 'condition'")
+            raise CJPlanError("Each `block` dict must have key 'condition'")
 
         _validate_condition(block["condition"])
 
         if "word_sequence" not in block:
-            raise CriterionJudgmentPlanError("Each `block` dict must have key 'word_sequence'")
+            raise CJPlanError("Each `block` dict must have key 'word_sequence'")
 
         if not isinstance(block["word_sequence"], list):
-            raise CriterionJudgmentPlanError("`block['word_sequence']` must be list[str]")
+            raise CJPlanError("`block['word_sequence']` must be list[str]")
 
 
     for i,block in enumerate(blocks):

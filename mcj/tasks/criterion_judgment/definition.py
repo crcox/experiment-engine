@@ -7,11 +7,11 @@ from mcj.runtime.emitters import (
 )
 from mcj.runtime.input_events import TriggerEvent, ButtonEvent
 from mcj.plans.criterion_judgment.schema import (
-    CriterionJudgmentPlan,
-    CriterionJudgmentResponse as Response
+    CJPlan,
+    CJResponse as Response
 )
 from mcj.plans.criterion_judgment.prompts_loader import load_prompt
-from mcj.tasks.criterion_judgment.display import CriterionJudgmentDefinitionDisplay
+from mcj.tasks.criterion_judgment.display import CJDefinitionDisplay
 from mcj.tasks.criterion_judgment.emitters import (
     emit_definition_start,
     emit_definition_end,
@@ -28,7 +28,7 @@ def present_definition(
     ):
     session = run_ctx.session
     ctx = session.ctx
-    plan = ctx.get_plan_typed("criterion_judgment", CriterionJudgmentPlan)
+    plan = ctx.get_plan_typed("criterion_judgment", CJPlan)
     profile_cfg = run_ctx.profile_cfg
 
     # --- Build or select prompt configuration ---
@@ -36,7 +36,7 @@ def present_definition(
     block_plan = plan.blocks[block_index]
     prompt = load_prompt(block_plan.condition)
 
-    display = CriterionJudgmentDefinitionDisplay(factory)
+    display = CJDefinitionDisplay(factory)
 
     state = DefinitionState.DEFINITION
     mapping_factory = profile_cfg.action_mapping_by_state[state]
@@ -74,6 +74,12 @@ def present_definition(
 
             events = ctx.input.pop_events()
             for event in events:
+                print(
+                    "[DEBUG POP]",
+                    type(event).__name__,
+                    getattr(event, "code", None),
+                    event.time,
+                )
                 if isinstance(event, TriggerEvent):
                     emit_scanner_trigger(ctx, event)
 
@@ -82,6 +88,13 @@ def present_definition(
 
                     if event.code == "escape":
                         raise EscapePressed
+
+                    print(
+                        "[DEBUG RESPONSE]",
+                        "definition",
+                        event.code,
+                        event.time,
+                    )
 
                     last_action = mapping.interpret(event)
                         

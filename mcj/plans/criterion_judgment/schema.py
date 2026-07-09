@@ -5,7 +5,7 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import Sequence
 
-class CriterionJudgmentCondition(str, Enum):
+class CJCondition(str, Enum):
     DOMAIN="domain"
     SIZE="size"
     DANGER="danger"
@@ -14,15 +14,15 @@ class CriterionJudgmentCondition(str, Enum):
     @property
     def requires_definition(self):
         return self in {
-            CriterionJudgmentCondition.SIZE,
-            CriterionJudgmentCondition.DANGER,
+            CJCondition.SIZE,
+            CJCondition.DANGER,
         }
 
-class CriterionJudgmentResponse(str, Enum):
+class CJResponse(str, Enum):
     YES="yes"
     NO="no"
 
-class CriterionJudgmentResponseSide(str, Enum):
+class CJResponseSide(str, Enum):
     LEFT="left"
     RIGHT="right"
 
@@ -45,49 +45,49 @@ class Orthography(str, Enum):
     LOWER = "lowercase"
 
 RESPONSE_TO_ATTRIBUTE_BY_CONDITION = {
-    CriterionJudgmentCondition.DOMAIN: {
-        CriterionJudgmentResponse.YES: Domain.LIVING,
-        CriterionJudgmentResponse.NO:  Domain.NONLIVING
+    CJCondition.DOMAIN: {
+        CJResponse.YES: Domain.LIVING,
+        CJResponse.NO:  Domain.NONLIVING
     },
-    CriterionJudgmentCondition.SIZE: {
-        CriterionJudgmentResponse.YES: Size.SMALL,
-        CriterionJudgmentResponse.NO:  Size.BIG
+    CJCondition.SIZE: {
+        CJResponse.YES: Size.SMALL,
+        CJResponse.NO:  Size.BIG
     },
-    CriterionJudgmentCondition.DANGER: {
-        CriterionJudgmentResponse.YES: Danger.DANGEROUS,
-        CriterionJudgmentResponse.NO:  Danger.SAFE
+    CJCondition.DANGER: {
+        CJResponse.YES: Danger.DANGEROUS,
+        CJResponse.NO:  Danger.SAFE
     },
-    CriterionJudgmentCondition.ORTHOGRAPHY: {
-        CriterionJudgmentResponse.YES: Orthography.UPPER,
-        CriterionJudgmentResponse.NO:  Orthography.LOWER
+    CJCondition.ORTHOGRAPHY: {
+        CJResponse.YES: Orthography.UPPER,
+        CJResponse.NO:  Orthography.LOWER
     },
 }
 
 @dataclass(frozen=True)
-class CriterionJudgmentTrial:
+class CJTrial:
     word: str
     domain: Domain
     size: Size
     danger: Danger
     orthography: Orthography
 
-    def expected_response(self, condition: CriterionJudgmentCondition) -> CriterionJudgmentResponse:
+    def expected_response(self, condition: CJCondition) -> CJResponse:
 
-        if condition == CriterionJudgmentCondition.DOMAIN:
-            return CriterionJudgmentResponse.YES if self.domain == Domain.LIVING else CriterionJudgmentResponse.NO
+        if condition == CJCondition.DOMAIN:
+            return CJResponse.YES if self.domain == Domain.LIVING else CJResponse.NO
 
-        elif condition == CriterionJudgmentCondition.SIZE:
-            return CriterionJudgmentResponse.YES if self.size == Size.SMALL else CriterionJudgmentResponse.NO
+        elif condition == CJCondition.SIZE:
+            return CJResponse.YES if self.size == Size.SMALL else CJResponse.NO
 
-        elif condition == CriterionJudgmentCondition.DANGER:
-            return CriterionJudgmentResponse.YES if self.danger == Danger.DANGEROUS else CriterionJudgmentResponse.NO
+        elif condition == CJCondition.DANGER:
+            return CJResponse.YES if self.danger == Danger.DANGEROUS else CJResponse.NO
 
-        elif condition == CriterionJudgmentCondition.ORTHOGRAPHY:
-            return CriterionJudgmentResponse.YES if self.orthography == Orthography.UPPER else CriterionJudgmentResponse.NO
+        elif condition == CJCondition.ORTHOGRAPHY:
+            return CJResponse.YES if self.orthography == Orthography.UPPER else CJResponse.NO
 
 
 @dataclass(frozen=True)
-class CriterionJudgmentBlockPlan(BlockPlan):
+class CJBlockPlan(BlockPlan):
     """
     Immutable specification of a single block's stimulus layout.
 
@@ -96,8 +96,8 @@ class CriterionJudgmentBlockPlan(BlockPlan):
     """
 
     block_index: int
-    condition: CriterionJudgmentCondition
-    trials: Sequence[CriterionJudgmentTrial]
+    condition: CJCondition
+    trials: Sequence[CJTrial]
 
     @property
     def ntrials(self) -> int:
@@ -105,14 +105,14 @@ class CriterionJudgmentBlockPlan(BlockPlan):
 
 
 @dataclass(frozen=True)
-class CriterionJudgmentPlan(TaskPlan):
+class CJPlan(TaskPlan):
     """
     Complete immutable plan for running MCJ
     for a single subject in a single session.
     """
     subject_id: int | None
-    blocks: Sequence[CriterionJudgmentBlockPlan]
-    left_response: CriterionJudgmentResponse
+    blocks: Sequence[CJBlockPlan]
+    left_response: CJResponse
 
     @property
     def nblocks(self) -> int:

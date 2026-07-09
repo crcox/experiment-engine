@@ -3,7 +3,7 @@ from mcj.runtime.display_primitives import StimFactory
 
 TASK="criterion_judgment"
 
-class CriterionJudgmentPromptDisplay:
+class CJPromptDisplay:
     def __init__(self, factory: StimFactory):
         self.prompt_frame = factory.create_text(
             name=f"{TASK}_prompt_frame",
@@ -51,7 +51,7 @@ class CriterionJudgmentPromptDisplay:
         self.right_label.draw()
 
 
-class CriterionJudgmentDefinitionDisplay:
+class CJDefinitionDisplay:
     def __init__(self, factory: StimFactory):
         self.definition = factory.create_text(
             name=f"{TASK}_definition",

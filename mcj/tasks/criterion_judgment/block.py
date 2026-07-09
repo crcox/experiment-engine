@@ -11,7 +11,7 @@ from mcj.runtime.exceptions import ExperimentAbort
 from mcj.runtime.execution import ExecutionContext
 from mcj.runtime.synchronization import wait_for_block_start, wait_for_command
 
-from mcj.plans.criterion_judgment.schema import CriterionJudgmentBlockPlan, CriterionJudgmentPlan
+from mcj.plans.criterion_judgment.schema import CJBlockPlan, CJPlan
 from mcj.tasks.criterion_judgment.emitters import emit_condition_set
 from mcj.tasks.criterion_judgment.timing import PreambleTiming, TrialTiming, build_schedule
 
@@ -27,7 +27,7 @@ def execute_block(factory: StimFactory, *,
     session = run_ctx.session
     ctx = session.ctx
     profile_cfg = run_ctx.profile_cfg
-    session_plan = ctx.get_plan_typed("criterion_judgment", CriterionJudgmentPlan)
+    session_plan = ctx.get_plan_typed("criterion_judgment", CJPlan)
 
     emit_block_execution_start(ctx, block_index)
     end_reason = EndReason.COMPLETE
@@ -94,7 +94,7 @@ def run_block_preamble(
         factory: StimFactory,
         *,
         block_index: int,
-        block_plan: CriterionJudgmentBlockPlan,
+        block_plan: CJBlockPlan,
         run_ctx: ExecutionContext[CJAction],
         timing: PreambleTiming | None
     ):
@@ -148,7 +148,7 @@ def run_block_trials(
         factory: StimFactory,
         *,
         block_index: int,
-        block_plan: CriterionJudgmentBlockPlan,
+        block_plan: CJBlockPlan,
         run_ctx: ExecutionContext[CJAction],
         timing: Sequence[TrialTiming] | None
     ):

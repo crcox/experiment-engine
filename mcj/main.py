@@ -24,8 +24,8 @@ from mcj.runtime.setup import build_session, resolve_display
 
 # --- Task Runtime and Configuration ---
 from mcj.tasks.criterion_judgment.display import (
-    CriterionJudgmentPromptDisplay,
-    CriterionJudgmentDefinitionDisplay,
+    CJPromptDisplay,
+    CJDefinitionDisplay,
 )
 from mcj.tasks.criterion_judgment.actions import CJAction
 from mcj.tasks.criterion_judgment import task as cj_task
@@ -37,10 +37,10 @@ from mcj.dev.session_info import StaticSessionInfoProvider
 # --- Routines ---
 from mcj.routines.instructions.actions import InstructionAction
 
-CriterionJudgmentDisplay = CriterionJudgmentPromptDisplay | CriterionJudgmentDefinitionDisplay
+CriterionJudgmentDisplay = CJPromptDisplay | CJDefinitionDisplay
 
 DEV_ENVIRONMENT = True
-RENDER_BACKEND = RenderBackend.FAKE
+RENDER_BACKEND = RenderBackend.PSYCHOPY
 
 if DEV_ENVIRONMENT or RENDER_BACKEND == RenderBackend.FAKE:
     from mcj.dev.scripts import test_experiment_scanner_script 

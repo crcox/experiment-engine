@@ -12,10 +12,10 @@ from mcj.runtime.input_events import ButtonEvent, TriggerEvent
 from mcj.components.fixation import FixationDisplay
 
 from mcj.plans.criterion_judgment.schema import (
-    CriterionJudgmentPlan,
-    CriterionJudgmentTrial as Trial,
-    CriterionJudgmentResponse as Response,
-    CriterionJudgmentResponseSide as ResponseSide,
+    CJPlan,
+    CJTrial as Trial,
+    CJResponse as Response,
+    CJResponseSide as ResponseSide,
 )
 from mcj.plans.criterion_judgment.prompts_loader import load_prompt
 from mcj.tasks.criterion_judgment.timing import TrialTiming
@@ -66,7 +66,7 @@ def run_trial(
     profile_cfg = run_ctx.profile_cfg
 
     # --- Build or select trial configuration ---
-    plan = ctx.get_plan_typed("criterion_judgment", CriterionJudgmentPlan)
+    plan = ctx.get_plan_typed("criterion_judgment", CJPlan)
     block_plan = plan.blocks[block_index]
     condition = block_plan.condition
     expected_response = trial.expected_response(condition)

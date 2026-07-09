@@ -6,8 +6,8 @@ from mcj.runtime.mapping import ActionMapping
 from mcj.runtime.environments import Environment
 from mcj.runtime.input_events import ButtonEvent
 from mcj.plans.criterion_judgment.schema import (
-    CriterionJudgmentResponse as Response,
-    CriterionJudgmentResponseSide as ResponseSide,
+    CJResponse as Response,
+    CJResponseSide as ResponseSide,
 )
 from mcj.tasks.criterion_judgment.actions import CJAction
 
@@ -55,3 +55,6 @@ def build_action_mapping(session: SessionRuntime) -> InputActionMapping:
         code_to_side=CODE_TO_SIDE_BY_ENVIRONMENT[session.environment],
     )
 
+
+def response_to_meaning():
+    pass

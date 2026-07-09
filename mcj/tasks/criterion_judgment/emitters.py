@@ -5,20 +5,21 @@ from mcj.runtime.session_context import SessionContext
 from mcj.runtime.end_reasons import EndReason
 from mcj.runtime.tasks import Task
 from mcj.plans.criterion_judgment.schema import (
-    CriterionJudgmentCondition,
-    CriterionJudgmentResponse
+    CJCondition,
+    CJResponse,
 )
 from mcj.tasks.criterion_judgment.actions import CJAction
+from mcj.tasks.criterion_judgment.event_types import CJEventType
 
 # State emitters ----
 def emit_condition_set(
     ctx: SessionContext,
-    condition: CriterionJudgmentCondition
+    condition: CJCondition
 ):
     ctx.recorder.emit({
-        "type": "condition_set",
+        "type": CJEventType.CONDITION_SET.value,
         "time": ctx.now(),
-        "environment": condition.value,
+        "condition": condition.value,
     })
 
 # Instantaneous events ----
@@ -26,7 +27,7 @@ def emit_stimulus_onset(
     ctx: SessionContext
 ):
     ctx.recorder.emit({
-        "type": "stimulus_onset",
+        "type": CJEventType.STIMULUS_ONSET.value,
         "time": ctx.now()
     })
 
@@ -35,17 +36,17 @@ def emit_action(
     action: CJAction
 ):
     ctx.recorder.emit({
-        "type": "action",
+        "type": CJEventType.ACTION.value,
         "time": ctx.now(),
         "action": action.value,
     })
 
 def emit_response(
     ctx: SessionContext,
-    response: CriterionJudgmentResponse
+    response: CJResponse
 ):
     ctx.recorder.emit({
-        "type": "response",
+        "type": CJEventType.RESPONSE.value,
         "time": ctx.now(),
         "response": response.value,
     })
@@ -54,24 +55,24 @@ def emit_response_mark(
     ctx: SessionContext,
 ):
     ctx.recorder.emit({
-        "type": "response_mark",
+        "type": CJEventType.RESPONSE_MARK.value,
         "time": ctx.now(),
     })
 
 
 
 # Bounded Events ----
-emit_definition_start = make_emitter("definition_start") 
-emit_definition_end = make_emitter("definition_end", has_reason=True) 
+emit_definition_start = make_emitter(CJEventType.DEFINITION_START.value) 
+emit_definition_end = make_emitter(CJEventType.DEFINITION_END.value, has_reason=True) 
 
-emit_prompt_start = make_emitter("prompt_start") 
-emit_prompt_end = make_emitter("prompt_end", has_reason=True) 
+emit_prompt_start = make_emitter(CJEventType.PROMPT_START.value) 
+emit_prompt_end = make_emitter(CJEventType.PROMPT_END.value, has_reason=True) 
 
 def emit_task_start(
     ctx: SessionContext,
 ):
     ctx.recorder.emit({
-        "type": "task_start",
+        "type": CJEventType.TASK_START.value,
         "time": ctx.now(),
         "task": Task.CRITERION_JUDGMENT.value,
     })
@@ -82,7 +83,7 @@ def emit_task_end(
     cause: str | None,
 ):
     ctx.recorder.emit({
-        "type": "task_end",
+        "type": CJEventType.TASK_END.value,
         "time": ctx.now(),
         "reason": reason.value,
         "cause": cause,

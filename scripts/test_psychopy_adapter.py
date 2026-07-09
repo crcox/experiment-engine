@@ -1,7 +1,7 @@
 from tests.fakes.display import FakeFactory
-from mcj.tasks.criterion_judgment.display import CriterionJudgmentPromptDisplay
+from mcj.tasks.criterion_judgment.display import CJPromptDisplay
 
-display = CriterionJudgmentPromptDisplay(FakeFactory())
+display = CJPromptDisplay(FakeFactory())
 
 display.update(
     prompt_frame_text="Frame",

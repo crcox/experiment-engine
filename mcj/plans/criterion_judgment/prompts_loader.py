@@ -5,7 +5,7 @@ import yaml
 from typing import Mapping
 from mcj.runtime.exceptions import DataContractError
 from mcj.plans.criterion_judgment.schema import (
-    CriterionJudgmentCondition as Condition
+    CJCondition as Condition
 )
 
 @dataclass(frozen=True)

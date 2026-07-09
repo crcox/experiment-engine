@@ -125,9 +125,9 @@ class FakeFactory(StimFactory):
 
 
 if __name__ == "__main__":
-    from mcj.tasks.criterion_judgment.display import CriterionJudgmentPromptDisplay
+    from mcj.tasks.criterion_judgment.display import CJPromptDisplay
 
-    display = CriterionJudgmentPromptDisplay(FakeFactory())
+    display = CJPromptDisplay(FakeFactory())
     display.update(
         prompt_frame_text="Frame",
         prompt_text="Hello",
