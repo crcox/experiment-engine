@@ -10,4 +10,4 @@ class TaskPlan(ABC):
     """
     Base class for all task plans.
     """
-    subject_id: int
+    pass
