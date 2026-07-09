@@ -10,6 +10,7 @@ from mcj.config.experiment import EXPERIMENT_NAME
 
 
 # --- Runtime core ---
+from mcj.reporting.criterion_judgment.report import build_trial_csv
 from mcj.runtime.backend import RenderBackend
 from mcj.runtime.execution import ExecutionContext
 from mcj.runtime.exceptions import ExperimentAbort, ScriptNotExhaustedError
@@ -126,6 +127,10 @@ def run():
     finally:
         emit_session_end(session.ctx, reason=end_reason, cause=end_cause)
         session_logger.write_new(session.ctx.recorder)
+        build_trial_csv(
+            session.ctx.recorder.events(),
+            session.ctx.data_dir / "session_trials.csv",
+        )
         factory.close()
         if session.scheduler is not None and not session.scheduler.is_finished:
             raise ScriptNotExhaustedError(remaining_events=session.scheduler.remaining_events)
