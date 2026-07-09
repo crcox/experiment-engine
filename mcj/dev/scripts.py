@@ -45,12 +45,14 @@ def test_experiment_scanner_script():
         return (
             s.after(2.0) # prompt duration
              .repeat(2, trial)
+             .wait(5.0)
+             .press("space", target="keyboard")
         )
 
     return (
         ScriptBuilder()
-        .at(1.0)
-        .press("space", target="keyboard")
+        .at(1.0) # instruction slide
+        .press("space", target="keyboard") # instruction slide
         .repeat(4, block)
         .build()
     )
