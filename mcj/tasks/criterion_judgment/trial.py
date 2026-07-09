@@ -183,6 +183,12 @@ def run_trial(
             # --- process mechanical events ---
             events = ctx.input.pop_events()
             for event in events:
+                print(
+                    "[DEBUG POP]",
+                    type(event).__name__,
+                    getattr(event, "code", None),
+                    event.time,
+                )
                 if isinstance(event, TriggerEvent):
                     emit_scanner_trigger(ctx, event)
 
@@ -192,6 +198,13 @@ def run_trial(
                     if event.code == "escape":
                         end_reason = EndReason.ABORTED
                         raise EscapePressed
+
+                    print(
+                        "[DEBUG RESPONSE]",
+                        f"trial({state.value})",
+                        event.code,
+                        event.time,
+                    )
 
                     action = mapping.interpret(event)
                     if action is not None and last_action.get() is None:

@@ -53,6 +53,12 @@ def present_instructions(
             should_advance = False
 
             for event in events:
+                print(
+                    "[DEBUG POP]",
+                    type(event).__name__,
+                    getattr(event, "code", None),
+                    event.time,
+                )
                 if isinstance(event, TriggerEvent):
                     emit_scanner_trigger(ctx, event)
 
@@ -63,6 +69,13 @@ def present_instructions(
                         raise EscapePressed
 
                     action = mapping.interpret(event)
+                    print(
+                        "[DEBUG RESPONSE]",
+                        "instructions",
+                        event.code,
+                        event.time,
+                    )
+
                     if action == InstructionAction.ADVANCE:
                         should_advance = True
                         break # one transition per frame

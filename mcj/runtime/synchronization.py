@@ -102,6 +102,10 @@ def wait_for_command(session: SessionRuntime) -> ButtonEvent:
     end_cause = None
 
     try:
+        print(
+            "[DEBUG] wait_for_command clear:",
+            len(ctx.input.peek_events())
+        )
         ctx.input.clear()
         while True:
 
@@ -109,6 +113,12 @@ def wait_for_command(session: SessionRuntime) -> ButtonEvent:
             ctx.input.update()
 
             for event in ctx.input.pop_events():
+                print(
+                    "[DEBUG POP]",
+                    type(event).__name__,
+                    getattr(event, "code", None),
+                    event.time,
+                )
                 if isinstance(event, ButtonEvent) and event.is_press:
                     if event.code == "escape":
                         raise EscapePressed
