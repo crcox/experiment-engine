@@ -72,6 +72,19 @@ def emit_profile_set(
         "time": ctx.now()
     })
 
+def emit_alignment(
+        ctx: SessionContext,
+        *,
+        t0_device: float | None,
+        t0_system: float | None,
+    ) -> None:
+    ctx.recorder.emit({
+        "type": "alignment",
+        "time": ctx.now(),
+        "t0_device": t0_device,
+        "t0_system": t0_system,
+    })
+
 
 # Structural emitters ----
 emit_session_start = make_emitter("session_start")
@@ -95,6 +108,12 @@ emit_fixation_end = make_emitter("fixation_end", has_reason=False)
 emit_auto_triggering_start = make_emitter("auto_triggering_start")
 emit_auto_triggering_end = make_emitter("auto_triggering_end", has_reason=False)
 
+emit_wait_for_command_start = make_emitter("wait_for_command_start")
+emit_wait_for_command_end = make_emitter("wait_for_command_end", has_reason=True)
+
+emit_wait_for_trigger_start = make_emitter("wait_for_trigger_start")
+emit_wait_for_trigger_end = make_emitter("wait_for_trigger_end", has_reason=True)
+
 def emit_alignment_start(
         ctx: SessionContext,
     ) -> None:
@@ -116,40 +135,6 @@ def emit_alignment_end(
         "time": ctx.now(),
         "t0_device": t0_device,
         "t0_system": t0_system,
-        "reason": reason,
-        "cause": cause,
-    })
-
-def emit_alignment(
-        ctx: SessionContext,
-        *,
-        t0_device: float | None,
-        t0_system: float | None,
-    ) -> None:
-    ctx.recorder.emit({
-        "type": "alignment",
-        "time": ctx.now(),
-        "t0_device": t0_device,
-        "t0_system": t0_system,
-    })
-
-def emit_wait_for_trigger_start(
-        ctx: SessionContext,
-    ) -> None:
-    ctx.recorder.emit({
-        "type": "wait_for_trigger_start",
-        "time": ctx.now(),
-    })
-
-def emit_wait_for_trigger_end(
-        ctx: SessionContext,
-        *,
-        reason: EndReason,
-        cause: str | None,
-    ) -> None:
-    ctx.recorder.emit({
-        "type": "wait_for_trigger_end",
-        "time": ctx.now(),
         "reason": reason,
         "cause": cause,
     })

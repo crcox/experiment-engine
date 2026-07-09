@@ -1,14 +1,18 @@
 import time
 
 from mcj.runtime.session import SessionRuntime
-from mcj.runtime.emitters import emit_alignment_start, emit_alignment_end, emit_alignment, emit_wait_for_trigger_start, emit_wait_for_trigger_end
+from mcj.runtime.emitters import (
+        emit_alignment,
+        emit_wait_for_trigger_start, emit_wait_for_trigger_end,
+        emit_wait_for_command_start, emit_wait_for_command_end,
+    )
 from mcj.runtime.end_reasons import EndReason
 from mcj.runtime.exceptions import ExperimentAbort, EscapePressed, CedrusAlignmentTimout, WaitForTriggerTimout
 from mcj.runtime.input_events import ButtonEvent, TriggerEvent
 from mcj.runtime.input import InputMode
 from mcj.runtime.cedrus import CedrusAdapter, Alignment
 
-WAIT_FOR_TRIGGER_TIMEOUT_SECONDS = 10.0
+WAIT_FOR_TRIGGER_TIMEOUT_SECONDS = None
 
 def wait_for_block_start(session: SessionRuntime) -> float:
     ctx = session.ctx
@@ -33,7 +37,10 @@ def wait_for_block_start(session: SessionRuntime) -> float:
 
         start = ctx.now()
         while not trigger_received:
-            if ctx.now() - start > WAIT_FOR_TRIGGER_TIMEOUT_SECONDS:
+            if (
+                    WAIT_FOR_TRIGGER_TIMEOUT_SECONDS is not None
+                    and ctx.now() - start > WAIT_FOR_TRIGGER_TIMEOUT_SECONDS
+                ):
                 raise WaitForTriggerTimout
 
             if not cedrus_adapter.is_aligned:
@@ -86,6 +93,47 @@ def wait_for_block_start(session: SessionRuntime) -> float:
             cause=end_cause
         )
 
+
+def wait_for_command(session: SessionRuntime) -> ButtonEvent:
+    ctx = session.ctx
+
+    emit_wait_for_command_start(ctx)
+    end_reason = EndReason.COMPLETE
+    end_cause = None
+
+    try:
+        ctx.input.clear()
+        while True:
+
+            session.maybe_step_simulation()
+            ctx.input.update()
+
+            for event in ctx.input.pop_events():
+                if isinstance(event, ButtonEvent) and event.is_press:
+                    if event.code == "escape":
+                        raise EscapePressed
+
+                    if event.code == "space":
+                        return event
+
+            time.sleep(0.0005)
+
+    except ExperimentAbort as e:
+        end_reason = e.reason
+        end_cause = e.cause
+        raise
+
+    except Exception as e:
+        end_reason = EndReason.ERROR
+        end_cause = type(e).__name__
+        raise
+
+    finally:
+        emit_wait_for_command_end(
+            ctx,
+            reason=end_reason,
+            cause=end_cause
+        )
 
 def sync_cedrus_and_experiment_clocks(session: SessionRuntime) -> Alignment:
     ctx = session.ctx
