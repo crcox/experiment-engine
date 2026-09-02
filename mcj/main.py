@@ -39,7 +39,7 @@ from mcj.ui.dialogs import PsychoPyDialogProvider
 
 CriterionJudgmentDisplay = CJPromptDisplay | CJDefinitionDisplay
 
-DEV_ENVIRONMENT = True
+DEV_ENVIRONMENT = False
 RENDER_BACKEND = RenderBackend.PSYCHOPY
 
 if DEV_ENVIRONMENT or RENDER_BACKEND == RenderBackend.FAKE:

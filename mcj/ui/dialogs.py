@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from mcj.runtime.exceptions import CancelPressed
 from mcj.runtime.environments import Environment
+from mcj.runtime.tasks import Task
 from mcj.runtime.input import InputMode
 from mcj.runtime.profiles import ExperimentProfile
 from mcj.runtime.session_info import SessionInfoProvider, SessionInfo, complete_session_info, parse_session_info
@@ -25,6 +26,7 @@ class PsychoPyDialogProvider(SessionInfoProvider):
         # Lists of strings are presented as a drop-down menu of options in the
         # dialog box
         ui_info = {
+            "task": [t.value for t in Task],
             "environment": [e.value for e in Environment],
             "profile": [p.value for p in ExperimentProfile],
             "subject_id": "",
