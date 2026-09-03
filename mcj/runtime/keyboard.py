@@ -42,8 +42,8 @@ class KeyboardAdapter(InputAdapter):
         clock: Clock,
         kb: KeyboardLike | None=None,
     ):
-        from psychopy.hardware.keyboard import Keyboard
         if kb is None:
+            from psychopy.hardware.keyboard import Keyboard
             self._kb = Keyboard(clock=PsychopyClockAdapter(clock))
         else:
             self._kb = kb

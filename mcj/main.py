@@ -41,7 +41,7 @@ from mcj.routines.instructions.actions import InstructionAction
 CriterionJudgmentDisplay = CJPromptDisplay | CJDefinitionDisplay
 
 DEV_ENVIRONMENT = True
-RENDER_BACKEND = RenderBackend.PSYCHOPY
+RENDER_BACKEND = RenderBackend.FAKE
 
 if DEV_ENVIRONMENT or RENDER_BACKEND == RenderBackend.FAKE:
     from mcj.dev.scripts import test_experiment_scanner_script 
