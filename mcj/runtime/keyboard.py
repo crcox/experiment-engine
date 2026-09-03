@@ -13,10 +13,13 @@ class PsychopyClockAdapter:
     def __init__(self, clock: Clock) -> None:
         self._clock = clock
 
-    def getTime(self) -> float:
-        return self._clock()
+    def getTime(self):
+        t = self._clock()
+        print("[CLOCK] getTime", t)
+        return t
 
-    def getLastResetTime(self) -> float:
+    def getLastResetTime(self):
+        print("[CLOCK] getLastResetTime")
         return 0.0
 
     def reset(self) -> None:

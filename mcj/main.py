@@ -41,18 +41,18 @@ from mcj.routines.instructions.actions import InstructionAction
 CriterionJudgmentDisplay = CJPromptDisplay | CJDefinitionDisplay
 
 DEV_ENVIRONMENT = True
-RENDER_BACKEND = RenderBackend.FAKE
+RENDER_BACKEND = RenderBackend.PSYCHOPY
 
 if DEV_ENVIRONMENT or RENDER_BACKEND == RenderBackend.FAKE:
-    from mcj.dev.scripts import test_experiment_scanner_script 
+    #from mcj.dev.scripts import test_experiment_scanner_script 
 
     provider = StaticSessionInfoProvider({
         "task": "criterion_judgment",
-        "environment": "scanner",
+        "environment": "local",
         "profile": "test_experiment",
-        "input_mode": "simulated_device",
-        "script": test_experiment_scanner_script(),
-        "enable_triggers": True,
+        "input_mode": "real",
+        #"script": test_experiment_scanner_script(),
+        #"enable_triggers": True,
     })
 else:
     provider = PsychoPyDialogProvider()
