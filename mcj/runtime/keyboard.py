@@ -2,12 +2,12 @@ from __future__ import annotations
 
 from collections import deque
 
-from mcj.runtime.time import Clock
-from mcj.runtime.input_events import ButtonEvent, ButtonDevice
-from mcj.runtime.input import InputAdapter
-
 from mcj.adapters.psychopy.api import get_keypresses
 from mcj.adapters.psychopy.protocols import KeyboardLike
+from mcj.runtime.input import InputAdapter
+from mcj.runtime.input_events import ButtonDevice, ButtonEvent
+from mcj.runtime.time import Clock
+
 
 class PsychopyClockAdapter:
     def __init__(self, clock: Clock) -> None:
@@ -36,23 +36,24 @@ class KeyboardAdapter(InputAdapter):
 
     Events are assumed to already be in system clock time.
     """
-    _clock: Clock
+
     _event_buffer: deque[ButtonEvent]
     _kb: KeyboardLike
+
     def __init__(
         self,
         *,
         clock: Clock,
-        kb: KeyboardLike | None=None,
+        kb: KeyboardLike | None = None,
     ):
         if kb is None:
             from psychopy.hardware.keyboard import Keyboard
+
             self._kb = Keyboard(clock=PsychopyClockAdapter(clock))
         else:
             self._kb = kb
 
         self._event_buffer: deque[ButtonEvent] = deque()
-
 
     def update(self) -> None:
         """
@@ -65,12 +66,11 @@ class KeyboardAdapter(InputAdapter):
             return
 
         for k in keys:
-            self._event_buffer.append(ButtonEvent(
-                time=k.rt,
-                code=k.name,
-                device=ButtonDevice.KEYBOARD,
-                is_press=True
-            ))
+            self._event_buffer.append(
+                ButtonEvent(
+                    time=k.rt, code=k.name, device=ButtonDevice.KEYBOARD, is_press=True
+                )
+            )
 
     def pop_events(self) -> list[ButtonEvent]:
         """
@@ -79,7 +79,6 @@ class KeyboardAdapter(InputAdapter):
         events = list(self._event_buffer)
         self._event_buffer.clear()
         return events
-
 
     def peek_events(self) -> list[ButtonEvent]:
         """

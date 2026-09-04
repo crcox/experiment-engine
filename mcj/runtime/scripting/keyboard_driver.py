@@ -1,8 +1,7 @@
-from mcj.runtime.time import Clock
+from mcj.runtime.input_events import ButtonDevice, ButtonEvent
 from mcj.runtime.keyboard import KeyboardAdapter
-from mcj.runtime.input_events import ButtonEvent, ButtonDevice
-
 from mcj.runtime.scripting.events import ScriptEvent
+from mcj.runtime.time import Clock
 
 
 class KeyboardScriptDriver:
@@ -23,7 +22,6 @@ class KeyboardScriptDriver:
     ):
         self._clock = clock
         self._adapter = adapter
-
 
     def handle(self, ev: ScriptEvent) -> None:
         now = self._clock()

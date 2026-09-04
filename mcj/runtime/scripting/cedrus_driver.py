@@ -1,6 +1,5 @@
-from mcj.runtime.scripting.events import ScriptEvent
-
 from mcj.adapters.pyxid2.mock import MockXidDevice
+from mcj.runtime.scripting.events import ScriptEvent
 
 
 class CedrusScriptDriver:
