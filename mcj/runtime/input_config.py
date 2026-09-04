@@ -34,7 +34,7 @@ def resolve_input_adapters(
                 f"No implementation defined for channel={channel} with input_mode={input_mode}"
             )
         factory = ADAPTER_FACTORIES[key]
-        adapters.append(factory(clock, session_info))
+        adapters.append(factory(clock))
 
     return adapters
 
@@ -66,19 +66,35 @@ def resolve_script_drivers(
     return drivers
 
 
-def build_keyboard(clock: Clock, _: SessionInfo):
-    return KeyboardAdapter(clock=clock)
+def build_keyboard(_: Clock):
+    """
+    If we are using a real keyboard, that is mediated by psychopy. We can
+    safely assume that if a real keyboard is desired, then psychopy is also
+    being used to render and display the experiment. This means that the single
+    authoratitive experiment clock is `psychopy.clock.monotonicClock`.
+    """
+    from psychopy.clock import monotonicClock
+    from psychopy.hardware.keyboard import Keyboard
+
+    return KeyboardAdapter(kb=Keyboard(clock=monotonicClock))
 
 
-def build_keyboard_mock(clock: Clock, _: SessionInfo):
-    return KeyboardAdapter(clock=clock)
+def build_keyboard_mock(_: Clock):
+    """
+    The MockKeyboard just passes events through from the KeyboardScriptDriver
+    to the InputAdapter. It does not create or timestamp events, and so does
+    not need a clock. The keyboard device is not actually simulated.
+    """
+    from mcj.adapters.psychopy.mock import MockKeyboard
+
+    return KeyboardAdapter(kb=MockKeyboard())
 
 
-def build_cedrus(clock: Clock, _: SessionInfo):
+def build_cedrus(clock: Clock):
     return CedrusAdapter(clock=clock, device=None)
 
 
-def build_cedrus_mock(clock: Clock, _: SessionInfo):
+def build_cedrus_mock(clock: Clock):
     device = MockXidDevice()
     return CedrusAdapter(clock=clock, device=device)
 
@@ -95,7 +111,7 @@ def get_mock_cedrus_device(adapters: Sequence[InputAdapter]) -> MockXidDevice | 
 
 ADAPTER_FACTORIES: dict[tuple[InputMode, InputChannel | None], AdapterFactory] = {
     (InputMode.REAL, InputChannel.KEYBOARD): build_keyboard,
-    (InputMode.SIMULATED_DEVICE, InputChannel.KEYBOARD): build_keyboard,
+    (InputMode.SIMULATED_DEVICE, InputChannel.KEYBOARD): build_keyboard_mock,
     (InputMode.REAL, InputChannel.CEDRUS): build_cedrus,
     (InputMode.SIMULATED_DEVICE, InputChannel.CEDRUS): build_cedrus_mock,
 }

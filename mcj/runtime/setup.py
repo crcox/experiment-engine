@@ -1,59 +1,50 @@
-from typing import Callable
+from collections.abc import Callable
 from pathlib import Path
 
+from mcj.adapters.fake.display import FakeFactory
+from mcj.adapters.psychopy.display import PsychoPyStimFactory
 from mcj.config.experiment import CONFIG_BY_PROFILE
 from mcj.config.paths import paths
-
+from mcj.io.loggers import EventTypeLogger
 from mcj.plans.criterion_judgment.loader import load_criterion_judgment_plan
-
-from mcj.runtime.config_types import TaskConfigBundle
-from mcj.runtime.recorders import DebugRecorderAdapter
-from mcj.runtime.session import SessionRuntime
-from mcj.runtime.session_context import SessionContext
-from mcj.runtime.events import EventRecorder
-from mcj.runtime.emitters import emit_auto_triggering_start, emit_auto_triggering_end
-from mcj.runtime.environments import Environment
 from mcj.runtime.backend import RenderBackend
+from mcj.runtime.config_types import TaskConfigBundle
 from mcj.runtime.display_profile import (
     LAPTOP_DISPLAY,
-    SCANNER_DISPLAY,
-    SCANNER_DEBUG,
     NULL_DISPLAY,
+    SCANNER_DEBUG,
+    SCANNER_DISPLAY,
 )
-
+from mcj.runtime.emitters import emit_auto_triggering_end, emit_auto_triggering_start
+from mcj.runtime.environments import Environment
+from mcj.runtime.events import EventRecorder
 from mcj.runtime.input import InputManager
-from mcj.runtime.input_config import resolve_input_adapters, resolve_script_drivers, get_mock_cedrus_device
-from mcj.runtime.session_info import SessionInfo
-
+from mcj.runtime.input_config import (
+    get_mock_cedrus_device,
+    resolve_input_adapters,
+    resolve_script_drivers,
+)
+from mcj.runtime.recorders import DebugRecorderAdapter
 from mcj.runtime.scripting.scheduler import ScriptScheduler
-
-from mcj.io.loggers import EventTypeLogger
-
+from mcj.runtime.session import SessionRuntime
+from mcj.runtime.session_context import SessionContext
+from mcj.runtime.session_info import SessionInfo
 from mcj.runtime.setup_types import TaskAssetPaths
 from mcj.stimuli.loader import load_word_metadata_csv
 
-from mcj.adapters.psychopy.display import PsychoPyStimFactory
-from mcj.adapters.fake.display import FakeFactory
-
 
 def build_session(
-    session_info: SessionInfo,
-    backend: RenderBackend
+    session_info: SessionInfo, backend: RenderBackend
 ) -> tuple[SessionRuntime, TaskConfigBundle, EventTypeLogger]:
 
     data_dir = resolve_data_dir(session_info)
     assets = resolve_assets(session_info)
 
     profile = session_info.profile
-    word_table = load_word_metadata_csv(
-        base_assets_dir=assets.base
-    )
+    word_table = load_word_metadata_csv(base_assets_dir=assets.base)
     clock = resolve_clock(backend)
 
-    input_adapters = resolve_input_adapters(
-        session_info,
-        clock
-    )
+    input_adapters = resolve_input_adapters(session_info, clock)
 
     input_manager = InputManager(input_adapters)
     script_drivers = resolve_script_drivers(session_info, clock, input_manager)
@@ -67,6 +58,7 @@ def build_session(
     print("[DEBUG] session_info.enable_triggers", session_info.enable_triggers)
 
     if cedrus_device is not None and session_info.enable_triggers:
+
         def start_auto_triggering():
             emit_auto_triggering_start(ctx)
             cedrus_device.start_auto_trigger()
@@ -82,15 +74,15 @@ def build_session(
     scheduler = None
     if session_info.script is not None:
         scheduler = ScriptScheduler(clock=clock, script=session_info.script)
- 
+
     # --- Define Session Context ---
     ctx = SessionContext(
         _plans={
-            'criterion_judgment': load_criterion_judgment_plan(
+            "criterion_judgment": load_criterion_judgment_plan(
                 profile_assets_dir=assets.profile,
                 profile=profile,
                 subject_id=session_info.subject_id,
-                word_table=word_table
+                word_table=word_table,
             )
         },
         assets=assets,
@@ -122,7 +114,9 @@ def build_session(
     return session, cfg, session_logger
 
 
-def resolve_display(session_info: SessionInfo, backend: RenderBackend, dev_environment: bool=False):
+def resolve_display(
+    session_info: SessionInfo, backend: RenderBackend, dev_environment: bool = False
+):
     if backend == RenderBackend.PSYCHOPY:
         if session_info.environment == Environment.LOCAL:
             display = LAPTOP_DISPLAY
@@ -142,7 +136,7 @@ def resolve_display(session_info: SessionInfo, backend: RenderBackend, dev_envir
             color=display.color,
             colorSpace=display.colorSpace,
             units=display.units,
-            fullscr=display.fullscr
+            fullscr=display.fullscr,
         )
         factory = PsychoPyStimFactory(win)
 
@@ -158,10 +152,12 @@ def resolve_display(session_info: SessionInfo, backend: RenderBackend, dev_envir
 def resolve_clock(backend: RenderBackend) -> Callable[[], float]:
     if backend == RenderBackend.PSYCHOPY:
         from psychopy.clock import monotonicClock
+
         return monotonicClock.getTime
 
     elif backend == RenderBackend.FAKE:
-        from time import perf_counter 
+        from time import perf_counter
+
         return perf_counter
 
     else:
@@ -174,8 +170,8 @@ def resolve_data_dir(session_info: SessionInfo) -> Path:
     subject_id = session_info.subject_id
     return paths.data_dir_for_profile(task, profile, subject_id)
 
+
 def resolve_assets(session_info: SessionInfo) -> TaskAssetPaths:
     task = session_info.task
     profile = session_info.profile
     return paths.asset_paths_for_profile(task, profile)
-

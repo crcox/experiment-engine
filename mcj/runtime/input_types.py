@@ -1,7 +1,6 @@
-from typing import Callable
+from collections.abc import Callable
 
-from mcj.runtime.time import Clock
-from mcj.runtime.session_info import SessionInfo
 from mcj.runtime.input import InputAdapter
+from mcj.runtime.time import Clock
 
-AdapterFactory = Callable[[Clock, SessionInfo], InputAdapter]
+AdapterFactory = Callable[[Clock], InputAdapter]
