@@ -1,9 +1,11 @@
 from abc import ABC, abstractmethod
 from collections import deque
+from collections.abc import Sequence
 from enum import Enum, auto
-from typing import Sequence, Type, TypeVar
+from typing import TypeVar
 
 from mcj.runtime.input_events import ButtonEvent, TriggerEvent
+
 
 class InputMode(Enum):
     REAL = "real"
@@ -22,8 +24,8 @@ class InputChannel(Enum):
     KEYBOARD = auto()
     CEDRUS = auto()
 
-class InputAdapter(ABC):
 
+class InputAdapter(ABC):
     @abstractmethod
     def update(self) -> None:
         pass
@@ -40,7 +42,9 @@ class InputAdapter(ABC):
     def clear(self) -> None:
         pass
 
+
 T = TypeVar("T", bound=InputAdapter)
+
 
 class InputManager:
     _adapters: Sequence[InputAdapter]
@@ -56,7 +60,6 @@ class InputManager:
             self._buffer.extend(adapter.pop_events())
 
         self._buffer = deque(sorted(self._buffer, key=lambda x: x.time))
-
 
     def peek_events(self) -> Sequence[ButtonEvent | TriggerEvent]:
         return list(self._buffer)
@@ -75,21 +78,22 @@ class InputManager:
     def inject_event(self, event: ButtonEvent | TriggerEvent) -> None:
         self._buffer.append(event)
 
-
     def clear(self):
         for adapter in self._adapters:
             adapter.clear()
 
         self._buffer.clear()
 
-    def require_adapter(self, adapter_cls: Type[T]) -> T:
+    def require_adapter(self, adapter_cls: type[T]) -> T:
         for a in self._adapters:
             if isinstance(a, adapter_cls):
                 return a
 
-        raise RuntimeError(f"No adapter of class {adapter_cls} was registered with InputManager.")
+        raise RuntimeError(
+            f"No adapter of class {adapter_cls} was registered with InputManager."
+        )
 
-    def has_adapter(self, adapter_cls: Type[T]) -> bool:
+    def has_adapter(self, adapter_cls: type[T]) -> bool:
         return any(isinstance(a, adapter_cls) for a in self._adapters)
 
     def get_adapters(self) -> Sequence[InputAdapter]:

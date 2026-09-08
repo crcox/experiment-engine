@@ -1,39 +1,43 @@
-from typing import TypeVar, Generic
+from collections.abc import Mapping
 from dataclasses import dataclass
 from enum import Enum
-from typing import Mapping
+from typing import Generic, TypeVar
 
+from mcj.runtime.mapping import ActionMappingByState
 from mcj.runtime.states import State
 from mcj.runtime.termination import (
-    TerminationCondition,
     ActionOrTimeoutTermination,
-    TimeTermination
+    TerminationCondition,
+    TimeTermination,
 )
-from mcj.runtime.mapping import ActionMappingByState
 
 ActionT = TypeVar("ActionT")
 
+
 class ExperimentProfile(str, Enum):
-    EXPERIMENT="experiment"
-    PRACTICE="practice"
-    DEV="dev"
-    TEST_EXPERIMENT="test_experiment"
+    EXPERIMENT = "experiment"
+    PRACTICE = "practice"
+    DEV = "dev"
+    TEST_EXPERIMENT = "test_experiment"
 
     @property
     def requires_subject_id(self):
         return self in {ExperimentProfile.EXPERIMENT, ExperimentProfile.PRACTICE}
+
 
 @dataclass(frozen=True)
 class FeedbackStimulusConfig:
     text: str
     color: str
 
+
 @dataclass(frozen=True)
 class FeedbackConfig:
     duration_seconds: float | None
-    stimulus_correct: FeedbackStimulusConfig 
-    stimulus_incorrect: FeedbackStimulusConfig 
-    stimulus_timeout: FeedbackStimulusConfig 
+    stimulus_correct: FeedbackStimulusConfig
+    stimulus_incorrect: FeedbackStimulusConfig
+    stimulus_timeout: FeedbackStimulusConfig
+
 
 @dataclass(frozen=True)
 class ResponseMarkConfig:
@@ -42,6 +46,7 @@ class ResponseMarkConfig:
     height: float = 0.03
     y_offset: float = -0.1
 
+
 @dataclass(frozen=True)
 class TimingConfig:
     prompt_duration_seconds: float | None = None
@@ -49,13 +54,14 @@ class TimingConfig:
     fixation_duration_seconds: float | None = None
     stimulus_duration_seconds: float | None = None
 
+
 @dataclass(frozen=True)
 class TaskProfileConfig(Generic[ActionT]):
     termination_by_state: Mapping[State, TerminationCondition[ActionT]]
     action_mapping_by_state: ActionMappingByState[ActionT]
     timing: TimingConfig | None
     feedback: FeedbackConfig | None
-    response_mark : ResponseMarkConfig | None
+    response_mark: ResponseMarkConfig | None
 
     @property
     def has_feedback_cfg(self) -> bool:
@@ -66,12 +72,8 @@ class TaskProfileConfig(Generic[ActionT]):
             raise RuntimeError("Subsequent operations required feedback to be defined")
         return self.feedback
 
-    def should_show_response_mark(
-        self,
-        state: State
-    ) -> bool:
-        return (
-            self.response_mark is not None
-            and isinstance(self.termination_by_state[state], (TimeTermination, ActionOrTimeoutTermination))
+    def should_show_response_mark(self, state: State) -> bool:
+        return self.response_mark is not None and isinstance(
+            self.termination_by_state[state],
+            (TimeTermination, ActionOrTimeoutTermination),
         )
-
